@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DAKER - Service Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0e17;
+    --surface: #111827;
+    --surface-hover: #1a2332;
+    --border: #1e2d3d;
+    --border-glow: #2563eb33;
+    --text: #e2e8f0;
+    --text-dim: #64748b;
+    --text-muted: #475569;
+    --blue: #3b82f6;
+    --blue-glow: #3b82f640;
+    --cyan: #06b6d4;
+    --cyan-glow: #06b6d430;
+    --green: #10b981;
+    --green-glow: #10b98130;
+    --orange: #f59e0b;
+    --orange-glow: #f59e0b30;
+    --purple: #8b5cf6;
+    --purple-glow: #8b5cf630;
+    --pink: #ec4899;
+    --pink-glow: #ec489930;
+    --red: #ef4444;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px;
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  header {
+    text-align: center;
+    margin-bottom: 80px;
+  }
+
+  header .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--cyan);
+    border: 1px solid var(--cyan);
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    background: var(--cyan-glow);
+  }
+
+  header h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 700;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, #fff 0%, var(--cyan) 50%, var(--blue) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+
+  header p {
+    color: var(--text-dim);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  /* Section titles */
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+    margin-top: 80px;
+  }
+
+  .section-title .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--cyan);
+    background: var(--cyan-glow);
+    border: 1px solid var(--cyan);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-weight: 600;
+  }
+
+  .section-title h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  /* Tech stack pills */
+  .tech-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .tech-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 20px;
+    transition: all 0.3s ease;
+  }
+
+  .tech-pill:hover {
+    border-color: var(--blue);
+    box-shadow: 0 0 20px var(--blue-glow);
+    transform: translateY(-2px);
+  }
+
+  .tech-pill .icon { font-size: 20px; }
+  .tech-pill .name { font-weight: 600; font-size: 14px; }
+  .tech-pill .desc { font-size: 12px; color: var(--text-dim); }
+
+  /* Architecture diagram */
+  .arch-diagram {
+    position: relative;
+    margin: 40px 0;
+  }
+
+  /* Browser box */
+  .browser-box {
+    border: 2px solid var(--blue);
+    border-radius: 16px;
+    padding: 32px;
+    background: linear-gradient(180deg, #111827 0%, #0d1321 100%);
+    box-shadow: 0 0 40px var(--blue-glow), inset 0 1px 0 rgba(255,255,255,0.05);
+    position: relative;
+  }
+
+  .browser-box::before {
+    content: 'BROWSER (Client)';
+    position: absolute;
+    top: -12px;
+    left: 24px;
+    background: var(--bg);
+    padding: 0 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--blue);
+    letter-spacing: 1px;
+  }
+
+  /* Page cards grid */
+  .pages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .page-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .page-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .page-card:hover {
+    border-color: var(--border-glow);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+
+  .page-card.main::after { background: var(--cyan); }
+  .page-card.main:hover { border-color: var(--cyan); box-shadow: 0 8px 30px var(--cyan-glow); }
+
+  .page-card.hackathons::after { background: var(--blue); }
+  .page-card.hackathons:hover { border-color: var(--blue); box-shadow: 0 8px 30px var(--blue-glow); }
+
+  .page-card.detail::after { background: var(--purple); }
+  .page-card.detail:hover { border-color: var(--purple); box-shadow: 0 8px 30px var(--purple-glow); }
+
+  .page-card.camp::after { background: var(--green); }
+  .page-card.camp:hover { border-color: var(--green); box-shadow: 0 8px 30px var(--green-glow); }
+
+  .page-card.rankings::after { background: var(--orange); }
+  .page-card.rankings:hover { border-color: var(--orange); box-shadow: 0 8px 30px var(--orange-glow); }
+
+  .page-card .route {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .page-card.main .route { color: var(--cyan); }
+  .page-card.hackathons .route { color: var(--blue); }
+  .page-card.detail .route { color: var(--purple); }
+  .page-card.camp .route { color: var(--green); }
+  .page-card.rankings .route { color: var(--orange); }
+
+  .page-card .title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .page-card .desc {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .page-card .features {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .page-card .feat {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.05);
+    color: var(--text-dim);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  /* Tabs inside detail card */
+  .tabs-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 10px;
+  }
+
+  .tab-chip {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: var(--purple-glow);
+    color: var(--purple);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    font-weight: 500;
+  }
+
+  /* localStorage box */
+  .storage-box {
+    border: 1px dashed var(--orange);
+    border-radius: 12px;
+    padding: 20px;
+    background: var(--orange-glow);
+    margin-top: 24px;
+  }
+
+  .storage-box .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--orange);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .storage-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .storage-item {
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--orange);
+  }
+
+  .storage-item span {
+    display: block;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  /* Arrow connectors */
+  .connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 0;
+    position: relative;
+  }
+
+  .connector .line {
+    width: 2px;
+    height: 40px;
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--text-muted) 0px,
+      var(--text-muted) 6px,
+      transparent 6px,
+      transparent 12px
+    );
+  }
+
+  .connector .arrow {
+    font-size: 18px;
+    color: var(--text-muted);
+  }
+
+  .connector .label-text {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  /* Server box */
+  .server-box {
+    border: 2px solid var(--green);
+    border-radius: 16px;
+    padding: 28px;
+    background: linear-gradient(180deg, #0d1f17 0%, #0a1610 100%);
+    box-shadow: 0 0 40px var(--green-glow);
+    position: relative;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .server-box::before {
+    content: 'VERCEL SERVER (Serverless)';
+    position: absolute;
+    top: -12px;
+    left: 24px;
+    background: var(--bg);
+    padding: 0 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--green);
+    letter-spacing: 1px;
+  }
+
+  .server-inner {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .api-route-box {
+    flex: 1;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .api-route-box .endpoint {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--green);
+  }
+
+  .api-route-box .purpose {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+
+  /* External API */
+  .external-box {
+    border: 2px solid var(--pink);
+    border-radius: 16px;
+    padding: 28px;
+    background: linear-gradient(180deg, #1f0d1a 0%, #150a12 100%);
+    box-shadow: 0 0 40px var(--pink-glow);
+    position: relative;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .external-box::before {
+    content: 'EXTERNAL API';
+    position: absolute;
+    top: -12px;
+    left: 24px;
+    background: var(--bg);
+    padding: 0 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--pink);
+    letter-spacing: 1px;
+  }
+
+  .gemini-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .gemini-badge .logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .gemini-badge .info .name {
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  .gemini-badge .info .detail {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  /* Data flow section */
+  .flow-timeline {
+    position: relative;
+    padding-left: 32px;
+  }
+
+  .flow-timeline::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+  }
+
+  .flow-step {
+    position: relative;
+    padding: 0 0 32px 24px;
+  }
+
+  .flow-step:last-child { padding-bottom: 0; }
+
+  .flow-step::before {
+    content: '';
+    position: absolute;
+    left: -25px;
+    top: 4px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--cyan);
+    background: var(--bg);
+  }
+
+  .flow-step .step-title {
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 6px;
+  }
+
+  .flow-step .step-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .flow-step .step-code {
+    margin-top: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--cyan);
+    overflow-x: auto;
+  }
+
+  /* Navigation map */
+  .nav-map {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .nav-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .nav-node {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .nav-node.from { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+  .nav-arrow { color: var(--text-muted); font-size: 16px; }
+  .nav-node.to { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+  .nav-label { font-size: 11px; color: var(--text-dim); font-style: italic; }
+
+  /* AI flow */
+  .ai-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    align-items: stretch;
+  }
+
+  .ai-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    position: relative;
+  }
+
+  .ai-step:first-child { border-radius: 12px 12px 0 0; }
+  .ai-step:last-child { border-radius: 0 0 12px 12px; }
+  .ai-step:not(:last-child) { border-bottom: none; }
+
+  .ai-step .step-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .ai-step:nth-child(1) .step-num { background: var(--green-glow); color: var(--green); border: 1px solid var(--green); }
+  .ai-step:nth-child(2) .step-num { background: var(--blue-glow); color: var(--blue); border: 1px solid var(--blue); }
+  .ai-step:nth-child(3) .step-num { background: var(--purple-glow); color: var(--purple); border: 1px solid var(--purple); }
+  .ai-step:nth-child(4) .step-num { background: var(--pink-glow); color: var(--pink); border: 1px solid var(--pink); }
+  .ai-step:nth-child(5) .step-num { background: var(--cyan-glow); color: var(--cyan); border: 1px solid var(--cyan); }
+
+  .ai-step .step-content .title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+
+  .ai-step .step-content .desc {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .ai-step .step-content .where {
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  /* Key point callout */
+  .callout {
+    border-left: 3px solid var(--cyan);
+    background: var(--cyan-glow);
+    padding: 16px 20px;
+    border-radius: 0 10px 10px 0;
+    margin-top: 24px;
+  }
+
+  .callout .callout-title {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--cyan);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .callout p {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  /* Summary table */
+  .summary-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .summary-table th {
+    background: var(--surface);
+    padding: 14px 20px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .summary-table td {
+    padding: 14px 20px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(17, 24, 39, 0.5);
+  }
+
+  .summary-table tr:last-child td { border-bottom: none; }
+
+  .summary-table td:first-child {
+    font-weight: 600;
+    color: var(--cyan);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .container { padding: 32px 16px; }
+    .pages-grid { grid-template-columns: 1fr; }
+    .server-inner { flex-direction: column; }
+    .browser-box { padding: 20px; }
+    .tech-stack { gap: 8px; }
+    .tech-pill { padding: 8px 14px; }
+    .section-title { margin-top: 48px; }
+    .nav-row { gap: 4px; }
+    .ai-step { padding: 14px; }
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-up {
+    animation: fadeUp 0.6s ease forwards;
+    opacity: 0;
+  }
+
+  .fade-up:nth-child(1) { animation-delay: 0.05s; }
+  .fade-up:nth-child(2) { animation-delay: 0.1s; }
+  .fade-up:nth-child(3) { animation-delay: 0.15s; }
+  .fade-up:nth-child(4) { animation-delay: 0.2s; }
+  .fade-up:nth-child(5) { animation-delay: 0.25s; }
+
+  .pulse-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <div class="tag">Architecture Overview</div>
+    <h1>DAKER</h1>
+    <p>해커톤 플랫폼 서비스 구조 설명서</p>
+  </header>
+
+  <!-- 01. Tech Stack -->
+  <div class="section-title">
+    <span class="num">01</span>
+    <h2>기술 스택</h2>
+  </div>
+
+  <div class="tech-stack">
+    <div class="tech-pill fade-up">
+      <div class="icon">&#9651;</div>
+      <div>
+        <div class="name">Next.js</div>
+        <div class="desc">App Router</div>
+      </div>
+    </div>
+    <div class="tech-pill fade-up">
+      <div class="icon">&#127912;</div>
+      <div>
+        <div class="name">Tailwind + shadcn/ui</div>
+        <div class="desc">스타일링</div>
+      </div>
+    </div>
+    <div class="tech-pill fade-up">
+      <div class="icon">&#127763;</div>
+      <div>
+        <div class="name">next-themes</div>
+        <div class="desc">다크 모드</div>
+      </div>
+    </div>
+    <div class="tech-pill fade-up">
+      <div class="icon">&#128190;</div>
+      <div>
+        <div class="name">localStorage</div>
+        <div class="desc">데이터 저장</div>
+      </div>
+    </div>
+    <div class="tech-pill fade-up">
+      <div class="icon">&#10024;</div>
+      <div>
+        <div class="name">Gemini API</div>
+        <div class="desc">AI 팀매칭</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 02. Architecture -->
+  <div class="section-title">
+    <span class="num">02</span>
+    <h2>전체 구조도</h2>
+  </div>
+
+  <div class="arch-diagram">
+
+    <!-- Browser -->
+    <div class="browser-box">
+
+      <div class="pages-grid">
+        <div class="page-card main fade-up">
+          <div class="route">/</div>
+          <div class="title">메인페이지</div>
+          <div class="desc">배너, 바로가기 링크</div>
+          <div class="features">
+            <span class="feat">배너</span>
+            <span class="feat">팀 모집 링크</span>
+            <span class="feat">랭킹 링크</span>
+          </div>
+        </div>
+
+        <div class="page-card hackathons fade-up">
+          <div class="route">/hackathons</div>
+          <div class="title">해커톤 목록</div>
+          <div class="desc">카드 리스트, 필터/정렬</div>
+          <div class="features">
+            <span class="feat">상태 필터</span>
+            <span class="feat">태그 필터</span>
+            <span class="feat">빈 상태 UI</span>
+          </div>
+        </div>
+
+        <div class="page-card detail fade-up">
+          <div class="route">/hackathons/:slug</div>
+          <div class="title">해커톤 상세</div>
+          <div class="desc">탭으로 섹션 전환</div>
+          <div class="tabs-row">
+            <span class="tab-chip">개요</span>
+            <span class="tab-chip">안내</span>
+            <span class="tab-chip">평가</span>
+            <span class="tab-chip">일정</span>
+            <span class="tab-chip">상금</span>
+            <span class="tab-chip">Teams</span>
+            <span class="tab-chip">Submit</span>
+            <span class="tab-chip">Leaderboard</span>
+          </div>
+        </div>
+
+        <div class="page-card camp fade-up">
+          <div class="route">/camp</div>
+          <div class="title">팀원 모집</div>
+          <div class="desc">팀 목록, 생성, AI 매칭 검색</div>
+          <div class="features">
+            <span class="feat">팀 생성</span>
+            <span class="feat" style="color:var(--green);border-color:rgba(16,185,129,0.3);">AI 검색 (Track 1)</span>
+          </div>
+        </div>
+
+        <div class="page-card rankings fade-up">
+          <div class="route">/rankings</div>
+          <div class="title">글로벌 랭킹</div>
+          <div class="desc">전체 순위, 기간 필터</div>
+          <div class="features">
+            <span class="feat">rank</span>
+            <span class="feat">닉네임</span>
+            <span class="feat">points</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- localStorage -->
+      <div class="storage-box">
+        <div class="label">
+          <span class="pulse-dot" style="background:var(--orange);"></span>
+          localStorage (클라이언트 DB)
+        </div>
+        <div class="storage-items">
+          <div class="storage-item">
+            hackathons
+            <span>해커톤 목록 + 상세</span>
+          </div>
+          <div class="storage-item">
+            teams
+            <span>팀 목록 (camp)</span>
+          </div>
+          <div class="storage-item">
+            submissions
+            <span>제출물</span>
+          </div>
+          <div class="storage-item">
+            leaderboards
+            <span>리더보드 점수</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /browser-box -->
+
+    <!-- Connector -->
+    <div class="connector">
+      <div class="line"></div>
+      <div class="arrow">&#9660;</div>
+      <div class="label-text">/camp의 AI 검색 요청만 서버로 전송</div>
+    </div>
+
+    <!-- Server -->
+    <div class="server-box">
+      <div class="server-inner">
+        <div class="api-route-box">
+          <div class="endpoint">POST /api/match</div>
+          <div class="purpose">사용자 쿼리 + teams 데이터를 받아서 Gemini에 전달하는 중계 역할. API 키를 서버에 숨김.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Connector -->
+    <div class="connector">
+      <div class="line"></div>
+      <div class="arrow">&#9660;</div>
+      <div class="label-text">프롬프트 + 팀 데이터 전송</div>
+    </div>
+
+    <!-- External -->
+    <div class="external-box">
+      <div class="gemini-badge">
+        <div class="logo">&#10024;</div>
+        <div class="info">
+          <div class="name">Gemini API</div>
+          <div class="detail">Google AI Studio &middot; 자연어로 팀 매칭 추천 + 근거 반환</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /arch-diagram -->
+
+  <div class="callout">
+    <div class="callout-title">&#128273; 왜 서버를 거치나요?</div>
+    <p>Gemini API 키를 브라우저에 넣으면 누구나 개발자도구에서 볼 수 있습니다. <strong>/api/match</strong>라는 서버(Vercel 서버리스 함수)를 중간에 두면, 키는 서버 환경변수에만 존재하고 브라우저에는 절대 노출되지 않습니다.</p>
+  </div>
+
+  <!-- 03. Data Flow -->
+  <div class="section-title">
+    <span class="num">03</span>
+    <h2>데이터 흐름</h2>
+  </div>
+
+  <div class="flow-timeline">
+    <div class="flow-step">
+      <div class="step-title">앱 최초 로드</div>
+      <div class="step-desc">localStorage에 데이터가 있는지 확인</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-title">데이터 없으면 &rarr; 초기화</div>
+      <div class="step-desc">예시 JSON 파일 (data/예시자료/*.json)을 localStorage에 복사</div>
+      <div class="step-code">localStorage.setItem("hackathons", JSON.stringify(sampleData))</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-title">데이터 있으면 &rarr; 바로 렌더링</div>
+      <div class="step-desc">각 페이지에서 localStorage를 읽어 화면에 표시</div>
+      <div class="step-code">const hackathons = JSON.parse(localStorage.getItem("hackathons"))</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-title">사용자 액션 시 &rarr; 저장</div>
+      <div class="step-desc">팀 생성, 제출물 업로드 등은 localStorage에 직접 쓰기</div>
+      <div class="step-code">localStorage.setItem("teams", JSON.stringify([...teams, newTeam]))</div>
+    </div>
+  </div>
+
+  <!-- 04. Page Navigation -->
+  <div class="section-title">
+    <span class="num">04</span>
+    <h2>페이지 간 이동</h2>
+  </div>
+
+  <div class="nav-map">
+    <div class="nav-row">
+      <span class="nav-node from" style="border-color:var(--cyan);color:var(--cyan);">/</span>
+      <span class="nav-arrow">&rarr;</span>
+      <span class="nav-node to" style="border-color:var(--blue);color:var(--blue);">/hackathons</span>
+      <span class="nav-label">배너 클릭</span>
+    </div>
+    <div class="nav-row">
+      <span class="nav-node from" style="border-color:var(--cyan);color:var(--cyan);">/</span>
+      <span class="nav-arrow">&rarr;</span>
+      <span class="nav-node to" style="border-color:var(--green);color:var(--green);">/camp</span>
+      <span class="nav-label">팀 모집 바로가기</span>
+    </div>
+    <div class="nav-row">
+      <span class="nav-node from" style="border-color:var(--cyan);color:var(--cyan);">/</span>
+      <span class="nav-arrow">&rarr;</span>
+      <span class="nav-node to" style="border-color:var(--orange);color:var(--orange);">/rankings</span>
+      <span class="nav-label">랭킹 바로가기</span>
+    </div>
+    <div class="nav-row">
+      <span class="nav-node from" style="border-color:var(--blue);color:var(--blue);">/hackathons</span>
+      <span class="nav-arrow">&rarr;</span>
+      <span class="nav-node to" style="border-color:var(--purple);color:var(--purple);">/hackathons/:slug</span>
+      <span class="nav-label">카드 클릭</span>
+    </div>
+    <div class="nav-row">
+      <span class="nav-node from" style="border-color:var(--purple);color:var(--purple);">/hackathons/:slug</span>
+      <span class="nav-arrow">&harr;</span>
+      <span class="nav-node to" style="border-color:var(--green);color:var(--green);">/camp?hackathon=slug</span>
+      <span class="nav-label">Teams 탭 &#x2194; Camp 상호 이동</span>
+    </div>
+  </div>
+
+  <!-- 05. AI Team Matching -->
+  <div class="section-title">
+    <span class="num">05</span>
+    <h2>AI 팀매칭 흐름 (Track 1)</h2>
+  </div>
+
+  <div class="ai-flow">
+    <div class="ai-step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="title">사용자가 자연어로 입력</div>
+        <div class="desc">"React 프론트 개발자 있는 팀 찾아줘"</div>
+        <div class="where">&#128205; /camp 페이지의 AI 검색창</div>
+      </div>
+    </div>
+    <div class="ai-step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="title">브라우저 &rarr; API Route 요청</div>
+        <div class="desc">검색어 + localStorage의 teams 데이터를 함께 POST 전송</div>
+        <div class="where">&#128205; POST /api/match { query, teams[] }</div>
+      </div>
+    </div>
+    <div class="ai-step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="title">서버에서 Gemini API 호출</div>
+        <div class="desc">프롬프트: "다음 팀 목록에서 사용자 조건에 맞는 팀을 추천하고 근거를 설명해줘"</div>
+        <div class="where">&#128205; Vercel 서버리스 &rarr; Gemini API (키는 서버 환경변수)</div>
+      </div>
+    </div>
+    <div class="ai-step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <div class="title">Gemini가 추천 결과 반환</div>
+        <div class="desc">매칭된 팀 + 추천 이유를 JSON으로 반환</div>
+        <div class="where">&#128205; { matches: [{ teamName, reason, score }] }</div>
+      </div>
+    </div>
+    <div class="ai-step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <div class="title">사용자에게 결과 표시</div>
+        <div class="desc">추천 팀 카드 + "이 팀을 추천하는 이유" 함께 렌더링</div>
+        <div class="where">&#128205; /camp 페이지에 결과 UI</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 06. Summary -->
+  <div class="section-title">
+    <span class="num">06</span>
+    <h2>핵심 요약</h2>
+  </div>
+
+  <table class="summary-table">
+    <tr>
+      <th style="width:140px;">항목</th>
+      <th>설명</th>
+    </tr>
+    <tr>
+      <td>Backend</td>
+      <td>없음. localStorage가 DB 역할</td>
+    </tr>
+    <tr>
+      <td>Server Code</td>
+      <td>/api/match 하나만 존재 (Gemini API 키 숨김용)</td>
+    </tr>
+    <tr>
+      <td>Data Init</td>
+      <td>앱 최초 로드 시 예시 JSON &rarr; localStorage 복사</td>
+    </tr>
+    <tr>
+      <td>State</td>
+      <td>React state + localStorage (별도 상태 라이브러리 없음)</td>
+    </tr>
+    <tr>
+      <td>Deploy</td>
+      <td>Vercel (정적 페이지 + API Route 서버리스)</td>
+    </tr>
+    <tr>
+      <td>AI Feature</td>
+      <td>자연어 &rarr; Gemini &rarr; 팀 추천 + 근거</td>
+    </tr>
+  </table>
+
+</div><!-- /container -->
+
+</body>
+</html>
