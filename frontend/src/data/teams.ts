@@ -6,7 +6,8 @@ export const teams: Team[] = [
     hackathonSlug: "aimers-8-model-lite",
     name: "Team Alpha",
     isOpen: true,
-    memberCount: 3,
+    memberCount: 2,
+    maxTeamSize: 3,
     lookingFor: ["Backend", "ML Engineer"],
     intro: "추론 최적화/경량화 실험을 함께 진행할 팀원을 찾습니다.",
     contact: {
@@ -20,7 +21,8 @@ export const teams: Team[] = [
     hackathonSlug: "monthly-vibe-coding-2026-02",
     name: "PromptRunners",
     isOpen: true,
-    memberCount: 1,
+    memberCount: 3,
+    maxTeamSize: 6,
     lookingFor: ["Frontend", "Designer"],
     intro: "프롬프트 품질 점수화 + 개선 가이드 UX를 기획합니다.",
     contact: {
@@ -35,6 +37,7 @@ export const teams: Team[] = [
     name: "404found",
     isOpen: true,
     memberCount: 3,
+    maxTeamSize: 8,
     lookingFor: ["Frontend", "Designer"],
     intro:
       "명세서 기반으로 기본 기능을 빠르게 완성하고 UX 확장을 노립니다.",
@@ -49,7 +52,8 @@ export const teams: Team[] = [
     hackathonSlug: "daker-handover-2026-03",
     name: "LGTM",
     isOpen: false,
-    memberCount: 5,
+    memberCount: 8,
+    maxTeamSize: 8,
     lookingFor: [],
     intro:
       "기획서-구현-문서화를 깔끔하게 맞추는 방향으로 진행합니다.",

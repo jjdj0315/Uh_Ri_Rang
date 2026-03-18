@@ -87,6 +87,7 @@ export function TeamCreateForm({
       name: name.trim(),
       isOpen: true,
       memberCount: 1,
+      maxTeamSize: parseInt(maxMembers, 10),
       lookingFor: roles,
       intro: intro.trim(),
       contact: {

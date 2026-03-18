@@ -141,6 +141,7 @@ export interface Team {
   name: string;
   isOpen: boolean;
   memberCount: number;
+  maxTeamSize: number;
   lookingFor: string[];
   intro: string;
   contact: TeamContact;
