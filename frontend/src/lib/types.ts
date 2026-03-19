@@ -188,12 +188,24 @@ export interface LeaderboardData {
 }
 
 // ============================================================
+// User Profile (Role System)
+// ============================================================
+
+export interface UserProfile {
+  role: "leader" | "member" | "unaffiliated";
+  hackathonSlug?: string;
+  teamCode?: string;
+  teamName?: string;
+}
+
+// ============================================================
 // AI Match (Track 1 / Track 2)
 // ============================================================
 
 export interface MatchRequest {
   query: string;
   hackathonSlug?: string;
+  role?: "leader" | "member" | "unaffiliated";
 }
 
 export interface MatchResponse {

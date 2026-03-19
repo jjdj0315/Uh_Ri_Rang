@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export async function POST(request: Request) {
-  const { query, teams, hackathonSlug } = await request.json();
+  const { query, teams, hackathonSlug, role } = await request.json();
 
   // GEMINI_API_KEY 없으면 에러
   const apiKey = process.env.GEMINI_API_KEY;
@@ -20,7 +20,13 @@ export async function POST(request: Request) {
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-  const prompt = `너는 해커톤 팀 매칭 전문가야. 사용자의 요청과 팀 목록을 보고 가장 적합한 팀을 추천해줘.
+  const isTeamMember = role === "leader" || role === "member";
+
+  const systemRole = isTeamMember
+    ? "너는 해커톤 팀원 매칭 전문가야. 사용자의 팀에 적합한 팀원(무소속 유저)을 추천해줘. 사용자의 요청과 팀 목록을 보고 가장 적합한 팀원을 찾아줘."
+    : "너는 해커톤 팀 매칭 전문가야. 사용자의 요청과 팀 목록을 보고 가장 적합한 팀을 추천해줘.";
+
+  const prompt = `${systemRole}
 
 사용자 요청: "${query}"
 

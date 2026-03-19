@@ -4,6 +4,7 @@ import type {
   Team,
   Submission,
   LeaderboardData,
+  UserProfile,
 } from "@/lib/types";
 
 const STORAGE_KEYS = {
@@ -12,6 +13,7 @@ const STORAGE_KEYS = {
   TEAMS: "teams",
   SUBMISSIONS: "submissions",
   LEADERBOARDS: "leaderboards",
+  USER_PROFILE: "userProfile",
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -99,4 +101,21 @@ export function getLeaderboard(
   hackathonSlug: string,
 ): LeaderboardData | undefined {
   return getLeaderboards().find((l) => l.hackathonSlug === hackathonSlug);
+}
+
+// ---------------------------------------------------------------------------
+// User Profile
+// ---------------------------------------------------------------------------
+
+export function getUserProfile(): UserProfile | null {
+  return getItem<UserProfile>(STORAGE_KEYS.USER_PROFILE);
+}
+
+export function setUserProfile(profile: UserProfile): void {
+  setItem(STORAGE_KEYS.USER_PROFILE, profile);
+}
+
+export function clearUserProfile(): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(STORAGE_KEYS.USER_PROFILE);
 }

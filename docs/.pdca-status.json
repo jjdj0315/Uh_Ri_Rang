@@ -5,7 +5,8 @@
   "primaryFeature": "daker-platform",
   "features": {
     "daker-platform": {
-      "phase": "do-complete",
+      "phase": "check",
+      "matchRate": 90,
       "planDoc": "docs/01-plan/features/daker-platform.plan.md",
       "designDoc": "docs/02-design/features/daker-platform.design.md",
       "analysisDoc": null,

@@ -4,8 +4,11 @@ import { useEffect, useState, useMemo } from "react";
 import { Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { initializeData } from "@/lib/init-data";
-import { getLeaderboards } from "@/lib/storage";
+import { getLeaderboards, getUserProfile } from "@/lib/storage";
 import { RankingTable } from "@/components/rankings/RankingTable";
+import { Podium } from "@/components/rankings/Podium";
+import { MyRankCard } from "@/components/rankings/MyRankCard";
+import { ScoreDistributionBar } from "@/components/rankings/ScoreDistributionBar";
 import { EmptyState } from "@/components/common/EmptyState";
 import { cn } from "@/lib/utils";
 import type { LeaderboardEntry } from "@/lib/types";
@@ -39,9 +42,16 @@ function filterByPeriod(
 export default function RankingsPage() {
   const [period, setPeriod] = useState<Period>("all");
   const [allEntries, setAllEntries] = useState<LeaderboardEntry[]>([]);
+  const [myTeamName, setMyTeamName] = useState<string | undefined>();
 
   useEffect(() => {
     initializeData();
+
+    // Read user profile to find my team
+    const profile = getUserProfile();
+    if (profile?.teamName) {
+      setMyTeamName(profile.teamName);
+    }
 
     // Aggregate all leaderboard entries across hackathons
     const leaderboards = getLeaderboards();
@@ -70,9 +80,30 @@ export default function RankingsPage() {
     return result.map((entry, idx) => ({ ...entry, rank: idx + 1 }));
   }, [allEntries, period]);
 
+  // Find my team's entry in the filtered list
+  const myEntry = myTeamName
+    ? filtered.find((e) => e.teamName === myTeamName)
+    : undefined;
+
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-bold">글로벌 랭킹</h1>
+
+      {/* My rank summary */}
+      <MyRankCard
+        teamName={myEntry?.teamName ?? myTeamName}
+        rank={myEntry?.rank}
+        score={myEntry?.score}
+        totalTeams={filtered.length}
+      />
+
+      {/* Score distribution bar */}
+      {filtered.length > 0 && (
+        <ScoreDistributionBar
+          entries={filtered.map((e) => ({ teamName: e.teamName, score: e.score }))}
+          myTeamName={myTeamName}
+        />
+      )}
 
       {/* Period filter */}
       <div className="flex gap-1.5">
@@ -92,7 +123,13 @@ export default function RankingsPage() {
       </div>
 
       {filtered.length > 0 ? (
-        <RankingTable entries={filtered} />
+        <>
+          {/* Top 3 Podium */}
+          <Podium entries={filtered.filter((e) => e.rank <= 3)} />
+
+          {/* Full ranking table */}
+          <RankingTable entries={filtered} myTeamName={myTeamName} />
+        </>
       ) : (
         <EmptyState
           icon={<Trophy />}
