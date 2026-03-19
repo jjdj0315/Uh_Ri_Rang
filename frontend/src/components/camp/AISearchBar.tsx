@@ -16,14 +16,17 @@ export interface AIMatch {
 interface AISearchBarProps {
   teams: Team[];
   hackathonSlug?: string;
+  role?: "leader" | "member" | "unaffiliated";
   onResults: (matches: AIMatch[]) => void;
 }
 
 export function AISearchBar({
   teams,
   hackathonSlug,
+  role,
   onResults,
 }: AISearchBarProps) {
+  const isTeamMember = role === "leader" || role === "member";
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<
     "idle" | "loading" | "success" | "error"
@@ -44,7 +47,7 @@ export function AISearchBar({
       const res = await fetch("/api/match", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query, teams, hackathonSlug }),
+        body: JSON.stringify({ query, teams, hackathonSlug, role: role ?? "unaffiliated" }),
       });
 
       if (!res.ok) {
@@ -66,7 +69,11 @@ export function AISearchBar({
     <div className="space-y-2">
       <div className="flex gap-2">
         <Input
-          placeholder="예: React 프론트엔드 개발자가 있는 팀 찾아줘"
+          placeholder={
+            isTeamMember
+              ? "예: Python 백엔드 경험자 찾아줘"
+              : "예: React 프론트엔드 개발자가 있는 팀 찾아줘"
+          }
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
@@ -83,7 +90,11 @@ export function AISearchBar({
           ) : (
             <SearchIcon className="size-4 mr-1" />
           )}
-          {status === "loading" ? "검색 중..." : "AI 검색"}
+          {status === "loading"
+            ? "검색 중..."
+            : isTeamMember
+              ? "AI로 팀원 찾기"
+              : "AI로 팀 찾기"}
         </Button>
       </div>
       {errorMsg && (

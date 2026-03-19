@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
-import { Noto_Sans_KR } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import "./globals.css";
 
-const notoSansKR = Noto_Sans_KR({
+const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+});
+
+const jetbrains = JetBrains_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
@@ -22,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" suppressHydrationWarning>
-      <body className={`${notoSansKR.variable} antialiased`}>
+      <body className={`${inter.variable} ${jetbrains.variable} antialiased`}>
         <ThemeProvider>
           <Navbar />
           <main className="container mx-auto px-4 py-8">{children}</main>

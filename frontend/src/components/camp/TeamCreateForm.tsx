@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Hackathon, Team } from "@/lib/types";
-import { addTeam } from "@/lib/storage";
+import { addTeam, setUserProfile } from "@/lib/storage";
 import {
   Dialog,
   DialogContent,
@@ -98,6 +98,15 @@ export function TeamCreateForm({
     };
 
     addTeam(team);
+
+    // 팀 생성 후 자동으로 팀장 역할 전환
+    setUserProfile({
+      role: "leader",
+      hackathonSlug: selectedHackathon,
+      teamCode: team.teamCode,
+      teamName: team.name,
+    });
+
     resetForm();
     onOpenChange(false);
     onCreated();
