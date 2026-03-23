@@ -17,6 +17,8 @@ interface AISearchBarProps {
   teams: Team[];
   hackathonSlug?: string;
   role?: "leader" | "member" | "unaffiliated";
+  skills?: string[];
+  interests?: string[];
   onResults: (matches: AIMatch[]) => void;
 }
 
@@ -24,6 +26,8 @@ export function AISearchBar({
   teams,
   hackathonSlug,
   role,
+  skills,
+  interests,
   onResults,
 }: AISearchBarProps) {
   const isTeamMember = role === "leader" || role === "member";
@@ -47,7 +51,14 @@ export function AISearchBar({
       const res = await fetch("/api/match", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query, teams, hackathonSlug, role: role ?? "unaffiliated" }),
+        body: JSON.stringify({
+          query,
+          teams,
+          hackathonSlug,
+          role: role ?? "unaffiliated",
+          skills: skills ?? [],
+          interests: interests ?? [],
+        }),
       });
 
       if (!res.ok) {

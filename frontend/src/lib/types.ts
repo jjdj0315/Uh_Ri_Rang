@@ -139,6 +139,7 @@ export interface Team {
   teamCode: string;
   hackathonSlug: string;
   name: string;
+  leaderName: string;
   isOpen: boolean;
   memberCount: number;
   maxTeamSize: number;
@@ -192,6 +193,9 @@ export interface LeaderboardData {
 // ============================================================
 
 export interface UserProfile {
+  nickname: string;
+  skills: string[];
+  interests: string[];
   role: "leader" | "member" | "unaffiliated";
   hackathonSlug?: string;
   teamCode?: string;
@@ -206,6 +210,8 @@ export interface MatchRequest {
   query: string;
   hackathonSlug?: string;
   role?: "leader" | "member" | "unaffiliated";
+  skills?: string[];
+  interests?: string[];
 }
 
 export interface MatchResponse {

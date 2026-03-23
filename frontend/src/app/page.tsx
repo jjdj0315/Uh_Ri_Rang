@@ -11,7 +11,6 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { StatusBadge } from "@/components/common/StatusBadge";
-import { RoleSelectDialog } from "@/components/common/RoleSelectDialog";
 import { initializeData } from "@/lib/init-data";
 import { getHackathons, getHackathonDetail, getTeams } from "@/lib/storage";
 import { formatDate, formatCurrency } from "@/lib/utils";
@@ -52,7 +51,6 @@ export default function Home() {
 
   return (
     <div className="flex flex-col gap-16">
-      <RoleSelectDialog />
       {/* Hero Section */}
       <section className="-mx-4 -mt-8 border-b border-border bg-muted/30 px-6 py-24">
         <div className="mx-auto max-w-3xl">

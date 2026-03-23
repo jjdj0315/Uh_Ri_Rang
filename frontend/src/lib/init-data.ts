@@ -33,8 +33,17 @@ export function initializeData(): void {
         localStorage.setItem(key, JSON.stringify(defaultValue));
         continue;
       }
-      // 파싱 시도 — 실패하면 catch에서 재초기화
-      JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+
+      // teams 데이터에 leaderName이 없으면 스키마 변경된 것이므로 재초기화
+      if (
+        key === STORAGE_KEYS.TEAMS &&
+        Array.isArray(parsed) &&
+        parsed.length > 0 &&
+        !("leaderName" in parsed[0])
+      ) {
+        localStorage.setItem(key, JSON.stringify(defaultValue));
+      }
     } catch {
       localStorage.setItem(key, JSON.stringify(defaultValue));
     }

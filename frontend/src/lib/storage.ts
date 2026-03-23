@@ -119,3 +119,29 @@ export function clearUserProfile(): void {
   if (typeof window === "undefined") return;
   localStorage.removeItem(STORAGE_KEYS.USER_PROFILE);
 }
+
+// ---------------------------------------------------------------------------
+// Team Join / Leave
+// ---------------------------------------------------------------------------
+
+export function joinTeam(teamCode: string): void {
+  const all = getItem<Team[]>(STORAGE_KEYS.TEAMS) ?? [];
+  const idx = all.findIndex((t) => t.teamCode === teamCode);
+  if (idx === -1) return;
+  all[idx].memberCount += 1;
+  if (all[idx].memberCount >= all[idx].maxTeamSize) {
+    all[idx].isOpen = false;
+  }
+  setItem(STORAGE_KEYS.TEAMS, all);
+}
+
+export function leaveTeam(teamCode: string): void {
+  const all = getItem<Team[]>(STORAGE_KEYS.TEAMS) ?? [];
+  const idx = all.findIndex((t) => t.teamCode === teamCode);
+  if (idx === -1) return;
+  all[idx].memberCount = Math.max(0, all[idx].memberCount - 1);
+  if (all[idx].memberCount < all[idx].maxTeamSize) {
+    all[idx].isOpen = true;
+  }
+  setItem(STORAGE_KEYS.TEAMS, all);
+}
