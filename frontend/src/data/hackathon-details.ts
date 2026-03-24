@@ -8,10 +8,7 @@ export const hackathonDetails: HackathonDetail[] = [
       overview: {
         summary:
           "제한된 평가 환경에서 모델의 성능과 추론 속도를 함께 최적화합니다.",
-        teamPolicy: {
-          allowSolo: true,
-          maxTeamSize: 5,
-        },
+        teamPolicy: { allowSolo: true, maxTeamSize: 5 },
       },
       info: {
         notice: [
@@ -26,22 +23,13 @@ export const hackathonDetails: HackathonDetail[] = [
       eval: {
         metricName: "FinalScore",
         description: "성능과 속도를 종합한 점수(세부 산식은 규정 참고).",
-        limits: {
-          maxRuntimeSec: 1200,
-          maxSubmissionsPerDay: 5,
-        },
+        limits: { maxRuntimeSec: 1200, maxSubmissionsPerDay: 5 },
       },
       schedule: {
         timezone: "Asia/Seoul",
         milestones: [
-          {
-            name: "리더보드 제출 마감",
-            at: "2026-02-25T10:00:00+09:00",
-          },
-          {
-            name: "대회 종료",
-            at: "2026-02-26T10:00:00+09:00",
-          },
+          { name: "리더보드 제출 마감", at: "2026-02-25T10:00:00+09:00" },
+          { name: "대회 종료", at: "2026-02-26T10:00:00+09:00" },
         ],
       },
       prize: {
@@ -70,23 +58,86 @@ export const hackathonDetails: HackathonDetail[] = [
     },
   },
   {
+    slug: "monthly-vibe-coding-2026-02",
+    title: "월간 해커톤 : 바이브 코딩 개선 AI 아이디어 공모전 (2026.02)",
+    sections: {
+      overview: {
+        summary:
+          "AI를 활용한 바이브 코딩 워크플로우 개선 아이디어를 제안하고 프로토타입을 만듭니다.",
+        teamPolicy: { allowSolo: true, maxTeamSize: 6 },
+      },
+      info: {
+        notice: [
+          "아이디어 공모전이므로 완성도보다 창의성을 중시합니다.",
+          "프로토타입 데모 영상(3분 이내)을 함께 제출하면 가산점이 있습니다.",
+        ],
+        links: {
+          rules: "https://example.com/public/rules/vibe202602",
+          faq: "https://example.com/public/faq/vibe202602",
+        },
+      },
+      eval: {
+        metricName: "IdeaScore",
+        description: "창의성, 실현 가능성, 임팩트를 종합 평가합니다.",
+        scoreSource: "vote",
+        scoreDisplay: {
+          label: "심사 점수",
+          breakdown: [
+            { key: "creativity", label: "창의성", weightPercent: 40 },
+            { key: "feasibility", label: "실현 가능성", weightPercent: 30 },
+            { key: "impact", label: "임팩트", weightPercent: 30 },
+          ],
+        },
+      },
+      schedule: {
+        timezone: "Asia/Seoul",
+        milestones: [
+          { name: "접수 시작", at: "2026-02-10T10:00:00+09:00" },
+          { name: "제출 마감", at: "2026-03-03T10:00:00+09:00" },
+          { name: "결과 발표", at: "2026-03-09T10:00:00+09:00" },
+        ],
+      },
+      prize: {
+        items: [
+          { place: "대상", amountKRW: 2000000 },
+          { place: "최우수상", amountKRW: 1000000 },
+          { place: "우수상", amountKRW: 500000 },
+        ],
+      },
+      teams: {
+        campEnabled: true,
+        listUrl: "/camp?hackathon=monthly-vibe-coding-2026-02",
+      },
+      submit: {
+        allowedArtifactTypes: ["url", "pdf"],
+        submissionUrl: "/hackathons/monthly-vibe-coding-2026-02#submit",
+        guide: [
+          "프로토타입 URL 또는 아이디어 문서(PDF)를 제출합니다.",
+          "데모 영상 링크가 있으면 메모란에 첨부해주세요.",
+        ],
+      },
+      leaderboard: {
+        publicLeaderboardUrl:
+          "/hackathons/monthly-vibe-coding-2026-02#leaderboard",
+        note: "투표 기반 순위이며, 결과 발표 전까지 비공개입니다.",
+      },
+    },
+  },
+  {
     slug: "daker-handover-2026-03",
     title: "긴급 인수인계 해커톤: 명세서만 보고 구현하라",
     sections: {
       overview: {
         summary:
           "기능 명세서만 남기고 사라진 개발자의 문서를 기반으로 바이브 코딩을 통해 웹서비스를 구현·배포하는 해커톤입니다.",
-        teamPolicy: {
-          allowSolo: true,
-          maxTeamSize: 5,
-        },
+        teamPolicy: { allowSolo: true, maxTeamSize: 5 },
       },
       info: {
         notice: [
           "예시 자료 외 데이터는 제공되지 않습니다.",
           "더미 데이터/로컬 저장소(localStorage 등)를 활용해 구현하세요.",
           "배포 URL은 외부에서 접속 가능해야하며 심사 기간동안 접근 가능해야합니다.",
-          "외부 API/외부 DB를 쓰는 경우에도 심사자가 별도 키 없이 확인 가능해야 합니다. (키가 필요한 기능은 평가에서 확인이 제한될 수 있음)",
+          "외부 API/외부 DB를 쓰는 경우에도 심사자가 별도 키 없이 확인 가능해야 합니다.",
         ],
         links: {
           rules: "https://example.com/public/rules/daker-handover-202603",
@@ -109,38 +160,14 @@ export const hackathonDetails: HackathonDetail[] = [
       schedule: {
         timezone: "Asia/Seoul",
         milestones: [
-          {
-            name: "접수/기획서 제출 기간",
-            at: "2026-03-04T10:00:00+09:00",
-          },
-          {
-            name: "접수/기획서 제출 마감",
-            at: "2026-03-30T10:00:00+09:00",
-          },
-          {
-            name: "최종 웹링크 제출 마감",
-            at: "2026-04-06T10:00:00+09:00",
-          },
-          {
-            name: "최종 솔루션 PDF 제출 마감",
-            at: "2026-04-13T10:00:00+09:00",
-          },
-          {
-            name: "1차 투표평가 시작",
-            at: "2026-04-13T12:00:00+09:00",
-          },
-          {
-            name: "1차 투표평가 마감",
-            at: "2026-04-17T10:00:00+09:00",
-          },
-          {
-            name: "2차 내부평가 종료",
-            at: "2026-04-24T23:59:00+09:00",
-          },
-          {
-            name: "최종 결과 발표",
-            at: "2026-04-27T10:00:00+09:00",
-          },
+          { name: "접수/기획서 제출 기간", at: "2026-03-04T10:00:00+09:00" },
+          { name: "접수/기획서 제출 마감", at: "2026-03-30T10:00:00+09:00" },
+          { name: "최종 웹링크 제출 마감", at: "2026-04-06T10:00:00+09:00" },
+          { name: "최종 솔루션 PDF 제출 마감", at: "2026-04-13T10:00:00+09:00" },
+          { name: "1차 투표평가 시작", at: "2026-04-13T12:00:00+09:00" },
+          { name: "1차 투표평가 마감", at: "2026-04-17T10:00:00+09:00" },
+          { name: "2차 내부평가 종료", at: "2026-04-24T23:59:00+09:00" },
+          { name: "최종 결과 발표", at: "2026-04-27T10:00:00+09:00" },
         ],
       },
       teams: {
@@ -156,27 +183,380 @@ export const hackathonDetails: HackathonDetail[] = [
           "PPT는 PDF로 변환하여 제출합니다.",
         ],
         submissionItems: [
-          {
-            key: "plan",
-            title: "기획서(1차 제출)",
-            format: "text_or_url",
-          },
-          {
-            key: "web",
-            title: "최종 웹링크 제출",
-            format: "url",
-          },
-          {
-            key: "pdf",
-            title: "최종 솔루션 PDF 제출",
-            format: "pdf_url",
-          },
+          { key: "plan", title: "기획서(1차 제출)", format: "text_or_url" },
+          { key: "web", title: "최종 웹링크 제출", format: "url" },
+          { key: "pdf", title: "최종 솔루션 PDF 제출", format: "pdf_url" },
         ],
       },
       leaderboard: {
         publicLeaderboardUrl:
           "/hackathons/daker-handover-2026-03#leaderboard",
         note: "아이디어 해커톤의 점수(score)는 투표 결과를 기반으로 표시됩니다.",
+      },
+    },
+  },
+  {
+    slug: "cv-object-detection-2026",
+    title: "CV 객체 인식 챌린지 2026",
+    sections: {
+      overview: {
+        summary:
+          "자율주행 환경의 다양한 객체를 정확하게 인식하는 모델을 개발합니다. mAP 기준으로 평가합니다.",
+        teamPolicy: { allowSolo: true, maxTeamSize: 5 },
+      },
+      info: {
+        notice: [
+          "학습 데이터는 대회 페이지에서 다운로드 가능합니다.",
+          "외부 사전학습 모델 사용 가능하나, 규정에 명시된 모델만 허용됩니다.",
+          "GPU 환경은 참가자 각자 준비해야 합니다.",
+        ],
+        links: {
+          rules: "https://example.com/public/rules/cv-objdet-2026",
+          faq: "https://example.com/public/faq/cv-objdet-2026",
+        },
+      },
+      eval: {
+        metricName: "mAP@0.5",
+        description: "IoU 0.5 기준 Mean Average Precision으로 평가합니다.",
+        limits: { maxRuntimeSec: 600, maxSubmissionsPerDay: 3 },
+      },
+      schedule: {
+        timezone: "Asia/Seoul",
+        milestones: [
+          { name: "대회 시작", at: "2026-03-10T10:00:00+09:00" },
+          { name: "제출 마감", at: "2026-04-10T10:00:00+09:00" },
+          { name: "결과 발표", at: "2026-04-15T10:00:00+09:00" },
+        ],
+      },
+      prize: {
+        items: [
+          { place: "1st", amountKRW: 5000000 },
+          { place: "2nd", amountKRW: 3000000 },
+          { place: "3rd", amountKRW: 1000000 },
+        ],
+      },
+      teams: {
+        campEnabled: true,
+        listUrl: "/camp?hackathon=cv-object-detection-2026",
+      },
+      submit: {
+        allowedArtifactTypes: ["zip"],
+        submissionUrl: "/hackathons/cv-object-detection-2026#submit",
+        guide: [
+          "추론 결과를 COCO 포맷 JSON으로 zip 압축하여 제출합니다.",
+          "파일명은 predictions.json이어야 합니다.",
+        ],
+      },
+      leaderboard: {
+        publicLeaderboardUrl:
+          "/hackathons/cv-object-detection-2026#leaderboard",
+        note: "Public 리더보드는 테스트 데이터의 50%로 산출됩니다. 최종 순위는 나머지 50%로 결정됩니다.",
+      },
+    },
+  },
+  {
+    slug: "fintech-fraud-detection",
+    title: "핀테크 이상거래 탐지 AI 해커톤",
+    sections: {
+      overview: {
+        summary:
+          "금융 거래 데이터에서 이상거래를 탐지하는 AI 모델을 개발합니다. F1-Score 기준으로 평가합니다.",
+        teamPolicy: { allowSolo: true, maxTeamSize: 4 },
+      },
+      info: {
+        notice: [
+          "제공 데이터는 비식별화 처리되어 있습니다.",
+          "외부 데이터 사용은 금지되며, 제공 데이터만으로 학습해야 합니다.",
+          "모델 추론 시간 제한이 있으니 규정을 확인하세요.",
+        ],
+        links: {
+          rules: "https://example.com/public/rules/fintech-fraud",
+          faq: "https://example.com/public/faq/fintech-fraud",
+        },
+      },
+      eval: {
+        metricName: "F1-Score",
+        description:
+          "이상거래 클래스에 대한 F1-Score로 평가합니다. 불균형 데이터를 고려한 성능을 측정합니다.",
+        limits: { maxRuntimeSec: 300, maxSubmissionsPerDay: 5 },
+      },
+      schedule: {
+        timezone: "Asia/Seoul",
+        milestones: [
+          { name: "대회 시작", at: "2026-03-15T10:00:00+09:00" },
+          { name: "제출 마감", at: "2026-04-05T10:00:00+09:00" },
+          { name: "결과 발표", at: "2026-04-12T10:00:00+09:00" },
+        ],
+      },
+      prize: {
+        items: [
+          { place: "1st", amountKRW: 5000000 },
+          { place: "2nd", amountKRW: 2000000 },
+          { place: "3rd", amountKRW: 1000000 },
+        ],
+      },
+      teams: {
+        campEnabled: true,
+        listUrl: "/camp?hackathon=fintech-fraud-detection",
+      },
+      submit: {
+        allowedArtifactTypes: ["zip"],
+        submissionUrl: "/hackathons/fintech-fraud-detection#submit",
+        guide: [
+          "예측 결과를 CSV 파일로 zip 압축하여 제출합니다.",
+          "컬럼: transaction_id, is_fraud (0 또는 1)",
+        ],
+      },
+      leaderboard: {
+        publicLeaderboardUrl:
+          "/hackathons/fintech-fraud-detection#leaderboard",
+        note: "Public 리더보드는 테스트 데이터의 30%로 산출됩니다.",
+      },
+    },
+  },
+  {
+    slug: "nlp-sentiment-2025",
+    title: "NLP 감성 분석 경진대회 2025",
+    sections: {
+      overview: {
+        summary:
+          "한국어 리뷰/댓글 데이터의 감성(긍정/부정/중립)을 분류하는 모델을 개발합니다.",
+        teamPolicy: { allowSolo: true, maxTeamSize: 5 },
+      },
+      info: {
+        notice: [
+          "학습 데이터는 약 10만 건의 한국어 리뷰입니다.",
+          "사전학습 모델(KoBERT, KoELECTRA 등) 사용을 권장합니다.",
+        ],
+        links: {
+          rules: "https://example.com/public/rules/nlp-sentiment-2025",
+          faq: "https://example.com/public/faq/nlp-sentiment-2025",
+        },
+      },
+      eval: {
+        metricName: "Macro F1-Score",
+        description:
+          "3개 클래스(긍정/부정/중립)에 대한 Macro F1-Score로 평가합니다.",
+        limits: { maxRuntimeSec: 600, maxSubmissionsPerDay: 5 },
+      },
+      schedule: {
+        timezone: "Asia/Seoul",
+        milestones: [
+          { name: "대회 시작", at: "2025-12-01T10:00:00+09:00" },
+          { name: "제출 마감", at: "2025-12-20T10:00:00+09:00" },
+          { name: "결과 발표", at: "2025-12-25T10:00:00+09:00" },
+        ],
+      },
+      prize: {
+        items: [
+          { place: "1st", amountKRW: 3000000 },
+          { place: "2nd", amountKRW: 1500000 },
+          { place: "3rd", amountKRW: 500000 },
+        ],
+      },
+      teams: {
+        campEnabled: true,
+        listUrl: "/camp?hackathon=nlp-sentiment-2025",
+      },
+      submit: {
+        allowedArtifactTypes: ["zip"],
+        submissionUrl: "/hackathons/nlp-sentiment-2025#submit",
+        guide: [
+          "예측 결과를 CSV 파일로 zip 압축하여 제출합니다.",
+          "컬럼: id, sentiment (positive/negative/neutral)",
+        ],
+      },
+      leaderboard: {
+        publicLeaderboardUrl:
+          "/hackathons/nlp-sentiment-2025#leaderboard",
+        note: "최종 순위는 Private 리더보드 기준으로 결정됩니다.",
+      },
+    },
+  },
+  {
+    slug: "open-data-visualization",
+    title: "공공데이터 시각화 공모전",
+    sections: {
+      overview: {
+        summary:
+          "공공데이터 포털의 데이터를 활용하여 시민에게 유용한 인터랙티브 시각화를 만듭니다.",
+        teamPolicy: { allowSolo: true, maxTeamSize: 4 },
+      },
+      info: {
+        notice: [
+          "data.go.kr의 공공데이터를 1개 이상 활용해야 합니다.",
+          "시각화 결과물은 웹 브라우저에서 접근 가능해야 합니다.",
+          "별도 설치 없이 URL만으로 확인 가능해야 합니다.",
+        ],
+        links: {
+          rules: "https://example.com/public/rules/open-data-viz",
+          faq: "https://example.com/public/faq/open-data-viz",
+        },
+      },
+      eval: {
+        metricName: "종합 점수",
+        description: "창의성, 사용성, 인사이트 도출을 종합 평가합니다.",
+        scoreSource: "vote",
+        scoreDisplay: {
+          label: "심사 점수",
+          breakdown: [
+            { key: "creativity", label: "창의성", weightPercent: 35 },
+            { key: "usability", label: "사용성", weightPercent: 35 },
+            { key: "insight", label: "인사이트", weightPercent: 30 },
+          ],
+        },
+      },
+      schedule: {
+        timezone: "Asia/Seoul",
+        milestones: [
+          { name: "접수 시작", at: "2025-12-20T10:00:00+09:00" },
+          { name: "제출 마감", at: "2026-01-15T10:00:00+09:00" },
+          { name: "결과 발표", at: "2026-01-20T10:00:00+09:00" },
+        ],
+      },
+      prize: {
+        items: [
+          { place: "대상", amountKRW: 3000000 },
+          { place: "최우수상", amountKRW: 1500000 },
+          { place: "우수상", amountKRW: 500000 },
+        ],
+      },
+      teams: {
+        campEnabled: true,
+        listUrl: "/camp?hackathon=open-data-visualization",
+      },
+      submit: {
+        allowedArtifactTypes: ["url", "pdf"],
+        submissionUrl: "/hackathons/open-data-visualization#submit",
+        guide: [
+          "배포된 시각화 URL을 제출합니다.",
+          "설명 문서(PDF)를 함께 제출하면 가산점이 있습니다.",
+        ],
+      },
+      leaderboard: {
+        publicLeaderboardUrl:
+          "/hackathons/open-data-visualization#leaderboard",
+        note: "심사위원 투표 기반 순위입니다.",
+      },
+    },
+  },
+  {
+    slug: "rag-chatbot-challenge",
+    title: "RAG 기반 도메인 챗봇 구축 챌린지",
+    sections: {
+      overview: {
+        summary:
+          "특정 도메인(법률, 의료, 교육 등)의 문서를 기반으로 RAG 챗봇을 구축합니다. 정확도와 응답 품질을 평가합니다.",
+        teamPolicy: { allowSolo: true, maxTeamSize: 5 },
+      },
+      info: {
+        notice: [
+          "도메인 선택은 자유이나, 평가용 질문셋은 대회 측에서 제공합니다.",
+          "LLM API 비용은 참가자 부담입니다.",
+          "오픈소스 LLM 사용 시 가산점이 있습니다.",
+        ],
+        links: {
+          rules: "https://example.com/public/rules/rag-chatbot",
+          faq: "https://example.com/public/faq/rag-chatbot",
+        },
+      },
+      eval: {
+        metricName: "RAG Score",
+        description:
+          "응답 정확도(Faithfulness), 관련성(Relevancy), 응답 시간을 종합 평가합니다.",
+        limits: { maxRuntimeSec: 30, maxSubmissionsPerDay: 10 },
+      },
+      schedule: {
+        timezone: "Asia/Seoul",
+        milestones: [
+          { name: "대회 시작", at: "2026-04-20T10:00:00+09:00" },
+          { name: "제출 마감", at: "2026-05-10T10:00:00+09:00" },
+          { name: "결과 발표", at: "2026-05-20T10:00:00+09:00" },
+        ],
+      },
+      prize: {
+        items: [
+          { place: "1st", amountKRW: 5000000 },
+          { place: "2nd", amountKRW: 2000000 },
+          { place: "3rd", amountKRW: 1000000 },
+        ],
+      },
+      teams: {
+        campEnabled: true,
+        listUrl: "/camp?hackathon=rag-chatbot-challenge",
+      },
+      submit: {
+        allowedArtifactTypes: ["url", "zip"],
+        submissionUrl: "/hackathons/rag-chatbot-challenge#submit",
+        guide: [
+          "챗봇 API 엔드포인트 URL을 제출합니다.",
+          "소스코드를 zip으로 함께 제출해주세요.",
+        ],
+      },
+      leaderboard: {
+        publicLeaderboardUrl:
+          "/hackathons/rag-chatbot-challenge#leaderboard",
+        note: "자동 평가 + 심사위원 수동 평가를 병행합니다.",
+      },
+    },
+  },
+  {
+    slug: "sustainable-energy-ai",
+    title: "지속가능 에너지 AI 예측 해커톤",
+    sections: {
+      overview: {
+        summary:
+          "태양광/풍력 발전량을 시계열 데이터 기반으로 예측하는 AI 모델을 개발합니다.",
+        teamPolicy: { allowSolo: true, maxTeamSize: 5 },
+      },
+      info: {
+        notice: [
+          "기상청 데이터 + 발전소 실측 데이터가 제공됩니다.",
+          "외부 기상 데이터 활용은 규정 내에서 허용됩니다.",
+          "예측 구간은 24시간(1시간 단위)입니다.",
+        ],
+        links: {
+          rules: "https://example.com/public/rules/sustainable-energy",
+          faq: "https://example.com/public/faq/sustainable-energy",
+        },
+      },
+      eval: {
+        metricName: "NMAE",
+        description:
+          "Normalized Mean Absolute Error로 평가합니다. 값이 낮을수록 우수합니다.",
+        limits: { maxRuntimeSec: 900, maxSubmissionsPerDay: 3 },
+      },
+      schedule: {
+        timezone: "Asia/Seoul",
+        milestones: [
+          { name: "대회 시작", at: "2026-05-01T10:00:00+09:00" },
+          { name: "제출 마감", at: "2026-06-01T10:00:00+09:00" },
+          { name: "결과 발표", at: "2026-06-10T10:00:00+09:00" },
+        ],
+      },
+      prize: {
+        items: [
+          { place: "1st", amountKRW: 7000000 },
+          { place: "2nd", amountKRW: 3000000 },
+          { place: "3rd", amountKRW: 1500000 },
+        ],
+      },
+      teams: {
+        campEnabled: true,
+        listUrl: "/camp?hackathon=sustainable-energy-ai",
+      },
+      submit: {
+        allowedArtifactTypes: ["zip"],
+        submissionUrl: "/hackathons/sustainable-energy-ai#submit",
+        guide: [
+          "예측 결과를 CSV 파일로 zip 압축하여 제출합니다.",
+          "컬럼: datetime, predicted_kwh",
+        ],
+      },
+      leaderboard: {
+        publicLeaderboardUrl:
+          "/hackathons/sustainable-energy-ai#leaderboard",
+        note: "Public 리더보드는 테스트 기간의 50%로 산출됩니다.",
       },
     },
   },

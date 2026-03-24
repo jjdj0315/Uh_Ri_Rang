@@ -3,15 +3,10 @@
 import { Trophy, Medal } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-
-interface PodiumEntry {
-  rank: number;
-  teamName: string;
-  score: number;
-}
+import type { LeaderboardEntry } from "@/lib/types";
 
 interface PodiumProps {
-  entries: PodiumEntry[];
+  entries: LeaderboardEntry[];
 }
 
 const PODIUM_CONFIG: Record<
@@ -55,7 +50,7 @@ const PODIUM_CONFIG: Record<
   },
 };
 
-function PodiumCard({ entry }: { entry: PodiumEntry }) {
+function PodiumCard({ entry }: { entry: LeaderboardEntry }) {
   const config = PODIUM_CONFIG[entry.rank];
   if (!config) return null;
 
@@ -97,10 +92,8 @@ export function Podium({ entries }: PodiumProps) {
   const second = entries.find((e) => e.rank === 2);
   const third = entries.find((e) => e.rank === 3);
 
-  // Layout order: 2nd | 1st | 3rd
-  const ordered = [second, first, third].filter(Boolean) as PodiumEntry[];
+  const ordered = [second, first, third].filter(Boolean) as LeaderboardEntry[];
 
-  // If only 1 entry, center it; if 2, show them side by side
   if (ordered.length === 1) {
     return (
       <div className="flex justify-center">
@@ -113,21 +106,9 @@ export function Podium({ entries }: PodiumProps) {
 
   return (
     <div className="grid grid-cols-3 items-end gap-3 max-w-lg mx-auto">
-      {second ? (
-        <PodiumCard entry={second} />
-      ) : (
-        <div />
-      )}
-      {first ? (
-        <PodiumCard entry={first} />
-      ) : (
-        <div />
-      )}
-      {third ? (
-        <PodiumCard entry={third} />
-      ) : (
-        <div />
-      )}
+      {second ? <PodiumCard entry={second} /> : <div />}
+      {first ? <PodiumCard entry={first} /> : <div />}
+      {third ? <PodiumCard entry={third} /> : <div />}
     </div>
   );
 }

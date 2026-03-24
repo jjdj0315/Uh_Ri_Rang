@@ -150,5 +150,39 @@
   }
   html {
     @apply font-sans;
+    scrollbar-gutter: stable;
+  }
+}
+
+/* Staggered card entrance animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-card {
+  animation: fadeInUp 0.4s ease-out both;
+}
+
+.animate-card:nth-child(1) { animation-delay: 0.03s; }
+.animate-card:nth-child(2) { animation-delay: 0.06s; }
+.animate-card:nth-child(3) { animation-delay: 0.09s; }
+.animate-card:nth-child(4) { animation-delay: 0.12s; }
+.animate-card:nth-child(5) { animation-delay: 0.15s; }
+.animate-card:nth-child(6) { animation-delay: 0.18s; }
+.animate-card:nth-child(7) { animation-delay: 0.21s; }
+.animate-card:nth-child(8) { animation-delay: 0.24s; }
+.animate-card:nth-child(9) { animation-delay: 0.27s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-card {
+    animation: none;
+    opacity: 1;
   }
 }

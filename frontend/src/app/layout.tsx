@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
-import { Navbar } from "@/components/layout/Navbar";
+import { AppShell } from "@/components/layout/AppShell";
 import "./globals.css";
 
-const inter = Inter({
+const spaceGrotesk = Space_Grotesk({
   variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 const jetbrains = JetBrains_Mono({
@@ -26,10 +27,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" suppressHydrationWarning>
-      <body className={`${inter.variable} ${jetbrains.variable} antialiased`}>
+      <body className={`${spaceGrotesk.variable} ${jetbrains.variable} antialiased`}>
         <ThemeProvider>
-          <Navbar />
-          <main className="container mx-auto px-4 py-8">{children}</main>
+          <AppShell>{children}</AppShell>
         </ThemeProvider>
       </body>
     </html>

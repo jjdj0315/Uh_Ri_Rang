@@ -25,8 +25,9 @@ export function LeaderboardTab({ data, hackathonSlug }: LeaderboardTabProps) {
     setLeaderboard(getLeaderboard(hackathonSlug));
 
     const profile = getUserProfile();
-    if (profile?.teamName) {
-      setMyTeamName(profile.teamName);
+    const membership = profile?.teams?.find((t) => t.hackathonSlug === hackathonSlug);
+    if (membership) {
+      setMyTeamName(membership.teamName);
     }
   }, [hackathonSlug]);
 

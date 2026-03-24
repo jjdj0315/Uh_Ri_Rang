@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Hackathon, Team } from "@/lib/types";
-import { addTeam, setUserProfile } from "@/lib/storage";
+import { addTeam, getUserProfile, setUserProfile, syncProfileToAccount } from "@/lib/storage";
 import {
   Dialog,
   DialogContent,
@@ -81,10 +81,12 @@ export function TeamCreateForm({
       .map((s) => s.trim())
       .filter(Boolean);
 
+    const currentProfile = getUserProfile();
     const team: Team = {
       teamCode: "T-" + crypto.randomUUID().slice(0, 8).toUpperCase(),
       hackathonSlug: selectedHackathon,
       name: name.trim(),
+      leaderName: currentProfile?.nickname ?? "익명",
       isOpen: true,
       memberCount: 1,
       maxTeamSize: parseInt(maxMembers, 10),
@@ -99,13 +101,23 @@ export function TeamCreateForm({
 
     addTeam(team);
 
-    // 팀 생성 후 자동으로 팀장 역할 전환
-    setUserProfile({
-      role: "leader",
-      hackathonSlug: selectedHackathon,
-      teamCode: team.teamCode,
-      teamName: team.name,
-    });
+    // 팀 생성 후 자동으로 팀장 역할 추가 (기존 프로필 보존)
+    const updatedProfile = {
+      nickname: currentProfile?.nickname ?? "",
+      skills: currentProfile?.skills ?? [],
+      interests: currentProfile?.interests ?? [],
+      teams: [
+        ...(currentProfile?.teams ?? []),
+        {
+          hackathonSlug: selectedHackathon,
+          teamCode: team.teamCode,
+          teamName: team.name,
+          role: "leader" as const,
+        },
+      ],
+    };
+    setUserProfile(updatedProfile);
+    syncProfileToAccount(updatedProfile);
 
     resetForm();
     onOpenChange(false);

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/common/EmptyState";
 import { StatusBadge } from "@/components/common/StatusBadge";
+import { CrownIcon } from "lucide-react";
 import { getTeams } from "@/lib/storage";
 import type { Team, TeamsSection } from "@/lib/types";
 
@@ -63,6 +64,15 @@ export function TeamsTab({ data, hackathonSlug }: TeamsTabProps) {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                  {team.leaderName && (
+                    <>
+                      <span className="inline-flex items-center gap-1">
+                        <CrownIcon className="size-3 text-amber-500" />
+                        {team.leaderName}
+                      </span>
+                      <span>·</span>
+                    </>
+                  )}
                   <span>{team.memberCount}명</span>
                   <span>·</span>
                   <div className="flex flex-wrap gap-1">
