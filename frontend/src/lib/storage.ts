@@ -171,6 +171,59 @@ export function syncProfileToAccount(profile: UserProfile): void {
 }
 
 // ---------------------------------------------------------------------------
+// Leaderboard Update (Submit → Leaderboard 연동)
+// ---------------------------------------------------------------------------
+
+export function updateLeaderboardOnSubmit(
+  hackathonSlug: string,
+  teamName: string,
+  artifacts?: { webUrl?: string; pdfUrl?: string; planTitle?: string }
+): void {
+  const all = getItem<import("@/lib/types").LeaderboardData[]>(STORAGE_KEYS.LEADERBOARDS) ?? [];
+  let lb = all.find((l) => l.hackathonSlug === hackathonSlug);
+
+  if (!lb) {
+    // 리더보드 없으면 새로 생성
+    lb = { hackathonSlug, updatedAt: new Date().toISOString(), entries: [] };
+    all.push(lb);
+  }
+
+  const existingIdx = lb.entries.findIndex((e) => e.teamName === teamName);
+
+  if (existingIdx !== -1) {
+    // 기존 엔트리 업데이트 (재제출)
+    lb.entries[existingIdx].submittedAt = new Date().toISOString();
+    if (artifacts) lb.entries[existingIdx].artifacts = artifacts;
+    // 점수는 랜덤 소폭 변동 (데모용)
+    lb.entries[existingIdx].score = Math.min(
+      100,
+      lb.entries[existingIdx].score + Math.random() * 3
+    );
+  } else {
+    // 새 엔트리 추가 — 기본 점수는 기존 최하위 근처에서 랜덤
+    const lowestScore = lb.entries.length > 0
+      ? Math.min(...lb.entries.map((e) => e.score))
+      : 50;
+    const newScore = lowestScore + Math.random() * 15;
+
+    lb.entries.push({
+      rank: 0, // 아래에서 재정렬
+      teamName,
+      score: Math.round(newScore * 100) / 100,
+      submittedAt: new Date().toISOString(),
+      artifacts,
+    });
+  }
+
+  // 점수 기준 재정렬 + rank 재부여
+  lb.entries.sort((a, b) => b.score - a.score);
+  lb.entries.forEach((e, i) => { e.rank = i + 1; });
+  lb.updatedAt = new Date().toISOString();
+
+  setItem(STORAGE_KEYS.LEADERBOARDS, all);
+}
+
+// ---------------------------------------------------------------------------
 // Profile Helpers (teams 배열 기반)
 // ---------------------------------------------------------------------------
 

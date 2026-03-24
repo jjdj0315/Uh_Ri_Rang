@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { addSubmission } from "@/lib/storage";
+import { addSubmission, getUserProfile, updateLeaderboardOnSubmit } from "@/lib/storage";
 import type { SubmitSection } from "@/lib/types";
 
 interface SubmitTabProps {
@@ -21,12 +21,34 @@ export function SubmitTab({ data, hackathonSlug }: SubmitTabProps) {
   const [notes, setNotes] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
-
-  // 단계별 제출용 상태
   const [stepValues, setStepValues] = useState<Record<string, string>>({});
+
+  // 유저 팀 정보
+  const [teamCode, setTeamCode] = useState("unknown");
+  const [teamName, setTeamName] = useState("Unknown Team");
+  const [hasTeam, setHasTeam] = useState(false);
+
+  useEffect(() => {
+    const profile = getUserProfile();
+    if (profile?.teams) {
+      const membership = profile.teams.find((t) => t.hackathonSlug === hackathonSlug);
+      if (membership) {
+        setTeamCode(membership.teamCode);
+        setTeamName(membership.teamName);
+        setHasTeam(true);
+      }
+    }
+  }, [hackathonSlug]);
 
   const handleSubmit = () => {
     setError("");
+
+    if (!hasTeam) {
+      setError("이 해커톤에 소속된 팀이 없습니다. Camp에서 팀에 참여해주세요.");
+      return;
+    }
+
+    let artifacts: { webUrl?: string; pdfUrl?: string; planTitle?: string } | undefined;
 
     if (data.submissionItems && data.submissionItems.length > 0) {
       // 단계별 제출
@@ -38,12 +60,20 @@ export function SubmitTab({ data, hackathonSlug }: SubmitTabProps) {
         return;
       }
 
+      // artifacts 매핑
+      artifacts = {};
+      data.submissionItems.forEach((item) => {
+        if (item.format === "url") artifacts!.webUrl = stepValues[item.key];
+        if (item.format === "pdf_url") artifacts!.pdfUrl = stepValues[item.key];
+        if (item.format === "text") artifacts!.planTitle = stepValues[item.key];
+      });
+
       data.submissionItems.forEach((item) => {
         addSubmission({
           id: `${Date.now()}-${item.key}`,
           hackathonSlug,
-          teamCode: "my-team",
-          teamName: "My Team",
+          teamCode,
+          teamName,
           artifactType: item.format,
           artifactUrl: stepValues[item.key],
           notes,
@@ -61,11 +91,13 @@ export function SubmitTab({ data, hackathonSlug }: SubmitTabProps) {
         return;
       }
 
+      artifacts = { webUrl: artifactUrl };
+
       addSubmission({
         id: `${Date.now()}`,
         hackathonSlug,
-        teamCode: "my-team",
-        teamName: "My Team",
+        teamCode,
+        teamName,
         artifactType: data.allowedArtifactTypes[0] ?? "url",
         artifactUrl,
         artifactText: title,
@@ -73,6 +105,9 @@ export function SubmitTab({ data, hackathonSlug }: SubmitTabProps) {
         submittedAt: new Date().toISOString(),
       });
     }
+
+    // 리더보드 갱신
+    updateLeaderboardOnSubmit(hackathonSlug, teamName, artifacts);
 
     setSubmitted(true);
   };
@@ -83,7 +118,7 @@ export function SubmitTab({ data, hackathonSlug }: SubmitTabProps) {
         <div className="text-4xl">&#10003;</div>
         <h3 className="text-lg font-semibold">제출 완료!</h3>
         <p className="text-sm text-muted-foreground">
-          제출이 성공적으로 완료되었습니다.
+          제출이 성공적으로 완료되었습니다. 리더보드에 반영됩니다.
         </p>
         <Button
           variant="outline"
@@ -103,6 +138,17 @@ export function SubmitTab({ data, hackathonSlug }: SubmitTabProps) {
 
   return (
     <div className="space-y-6">
+      {/* 팀 정보 */}
+      {hasTeam ? (
+        <div className="rounded-md bg-muted/50 p-3 text-sm">
+          제출 팀: <span className="font-semibold">{teamName}</span>
+        </div>
+      ) : (
+        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+          이 해커톤에 소속된 팀이 없습니다. Camp에서 팀에 참여한 후 제출해주세요.
+        </div>
+      )}
+
       {/* 가이드 */}
       <div>
         <h3 className="mb-3 text-lg font-semibold">제출 안내</h3>
@@ -188,7 +234,7 @@ export function SubmitTab({ data, hackathonSlug }: SubmitTabProps) {
             />
           </div>
 
-          <Button onClick={handleSubmit} className="w-full">
+          <Button onClick={handleSubmit} className="w-full" disabled={!hasTeam}>
             제출하기
           </Button>
         </div>
@@ -224,7 +270,7 @@ export function SubmitTab({ data, hackathonSlug }: SubmitTabProps) {
             />
           </div>
 
-          <Button onClick={handleSubmit} className="w-full">
+          <Button onClick={handleSubmit} className="w-full" disabled={!hasTeam}>
             제출하기
           </Button>
         </div>
