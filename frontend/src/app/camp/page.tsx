@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { initializeData } from "@/lib/init-data";
 import {
   getHackathons,
@@ -9,6 +9,9 @@ import {
   getUserProfile,
   setUserProfile as saveUserProfile,
   joinTeam,
+  syncProfileToAccount,
+  getRoleForHackathon,
+  getTeamMembers,
 } from "@/lib/storage";
 import type { Hackathon, Team, UserProfile } from "@/lib/types";
 import { TeamCard } from "@/components/camp/TeamCard";
@@ -16,6 +19,7 @@ import { TeamCreateForm } from "@/components/camp/TeamCreateForm";
 import { AISearchBar, type AIMatch } from "@/components/camp/AISearchBar";
 import { AIMatchResult } from "@/components/camp/AIMatchResult";
 import { EmptyState } from "@/components/common/EmptyState";
+import { LoginRequiredDialog } from "@/components/common/LoginRequiredDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -29,6 +33,7 @@ import { PlusIcon, UsersIcon, CrownIcon, UserIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 function CampContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const hackathonParam = searchParams.get("hackathon") ?? "";
 
@@ -40,8 +45,16 @@ function CampContent() {
   const [aiMatches, setAiMatches] = useState<AIMatch[] | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
-  const userRole = userProfile?.role ?? "unaffiliated";
-  const isTeamMember = userRole === "leader" || userRole === "member";
+  // 현재 선택된 해커톤 기준으로 역할 판단
+  const { role: currentRole, membership: currentMembership } =
+    getRoleForHackathon(userProfile, selectedHackathon);
+  const isTeamMember = currentRole === "leader" || currentRole === "member";
+  const isGuest = userProfile?.nickname === "게스트";
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+
+  const requireLogin = () => {
+    setLoginDialogOpen(true);
+  };
 
   useEffect(() => {
     initializeData();
@@ -50,16 +63,6 @@ function CampContent() {
     const profile = getUserProfile();
     if (profile) {
       setUserProfile(profile);
-
-      // 팀장/회원이면 소속 해커톤으로 자동 고정
-      if (
-        (profile.role === "leader" || profile.role === "member") &&
-        profile.hackathonSlug
-      ) {
-        setSelectedHackathon(profile.hackathonSlug);
-        loadTeams(profile.hackathonSlug);
-        return;
-      }
     }
 
     loadTeams(hackathonParam);
@@ -79,7 +82,6 @@ function CampContent() {
   }
 
   function handleCreated() {
-    // Re-read profile (TeamCreateForm sets role to leader)
     const updated = getUserProfile();
     if (updated) setUserProfile(updated);
     loadTeams(selectedHackathon || undefined);
@@ -87,36 +89,49 @@ function CampContent() {
 
   function handleJoinTeam(team: Team) {
     if (!userProfile) return;
+    if (isGuest) { requireLogin(); return; }
     joinTeam(team.teamCode);
     const updated: UserProfile = {
       ...userProfile,
-      role: "member",
-      hackathonSlug: team.hackathonSlug,
-      teamCode: team.teamCode,
-      teamName: team.name,
+      teams: [
+        ...userProfile.teams,
+        {
+          hackathonSlug: team.hackathonSlug,
+          teamCode: team.teamCode,
+          teamName: team.name,
+          role: "member",
+        },
+      ],
     };
     saveUserProfile(updated);
+    syncProfileToAccount(updated);
     setUserProfile(updated);
-    setSelectedHackathon(team.hackathonSlug);
-    loadTeams(team.hackathonSlug);
+    loadTeams(selectedHackathon || undefined);
   }
 
-  // 내 팀 찾기
-  const myTeam =
-    isTeamMember && userProfile?.teamCode
-      ? allTeams.find((t) => t.teamCode === userProfile.teamCode)
-      : undefined;
+  // 현재 해커톤에서의 내 팀
+  const myTeam = currentMembership
+    ? allTeams.find((t) => t.teamCode === currentMembership.teamCode)
+    : undefined;
 
   // 내 팀 제외한 다른 팀 목록
   const otherTeams = myTeam
     ? teams.filter((t) => t.teamCode !== myTeam.teamCode)
     : teams;
 
+  // 현재 해커톤에서 이미 팀에 소속되어 있는지
+  const alreadyInTeamForHackathon = currentMembership !== undefined;
+
+  // 이 해커톤에서 참여 가능한지 (이미 이 해커톤 팀에 소속이면 불가)
+  const canJoinTeam = (team: Team) =>
+    !alreadyInTeamForHackathon &&
+    team.isOpen &&
+    team.memberCount < team.maxTeamSize;
+
   // 소속 해커톤 이름
-  const myHackathonTitle =
-    isTeamMember && userProfile?.hackathonSlug
-      ? hackathons.find((h) => h.slug === userProfile.hackathonSlug)?.title
-      : undefined;
+  const myHackathonTitle = selectedHackathon
+    ? hackathons.find((h) => h.slug === selectedHackathon)?.title
+    : undefined;
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-4 py-8">
@@ -132,27 +147,27 @@ function CampContent() {
               : "함께할 팀을 찾거나, 새로운 팀을 만들어보세요."}
           </p>
         </div>
-        {!isTeamMember && (
-          <Button onClick={() => setShowCreateForm(true)}>
+        {!alreadyInTeamForHackathon && (
+          <Button onClick={() => isGuest ? requireLogin() : setShowCreateForm(true)}>
             <PlusIcon className="size-4 mr-1" />
             팀 만들기
           </Button>
         )}
       </div>
 
-      {/* 내 팀 카드 (팀장/회원일 때) */}
-      {isTeamMember && myTeam && (
+      {/* 내 팀 카드 (현재 해커톤에서 소속된 팀이 있을 때) */}
+      {isTeamMember && myTeam && currentMembership && (
         <Card className="ring-2 ring-primary/30 bg-primary/5">
           <CardHeader>
             <div className="flex items-center gap-2">
-              {userRole === "leader" ? (
+              {currentRole === "leader" ? (
                 <CrownIcon className="size-5 text-amber-500" />
               ) : (
                 <UserIcon className="size-5 text-primary" />
               )}
               <CardTitle className="text-lg">내 팀</CardTitle>
               <Badge variant="outline" className="ml-auto">
-                {userRole === "leader" ? "팀장" : "팀원"}
+                {currentRole === "leader" ? "팀장" : "팀원"}
               </Badge>
             </div>
           </CardHeader>
@@ -172,6 +187,23 @@ function CampContent() {
             {myTeam.intro && (
               <p className="text-sm text-muted-foreground">{myTeam.intro}</p>
             )}
+            {/* 팀원 목록 */}
+            <div className="pt-2 border-t border-border space-y-1.5">
+              <span className="text-xs font-medium text-muted-foreground">팀원</span>
+              {getTeamMembers(myTeam.teamCode).map((m) => (
+                <div key={m.nickname} className="flex items-center gap-1.5 text-sm">
+                  {m.role === "leader" ? (
+                    <CrownIcon className="size-3.5 text-amber-500 shrink-0" />
+                  ) : (
+                    <UserIcon className="size-3.5 text-muted-foreground shrink-0" />
+                  )}
+                  <span>{m.nickname}</span>
+                  {m.role === "leader" && (
+                    <span className="text-xs text-muted-foreground">(팀장)</span>
+                  )}
+                </div>
+              ))}
+            </div>
             {myTeam.lookingFor.length > 0 && (
               <div className="flex flex-wrap gap-1.5 pt-1">
                 <span className="text-xs text-muted-foreground">모집 중:</span>
@@ -199,7 +231,7 @@ function CampContent() {
         <AISearchBar
           teams={allTeams}
           hackathonSlug={selectedHackathon || undefined}
-          role={userRole}
+          role={currentRole}
           skills={userProfile?.skills}
           interests={userProfile?.interests}
           onResults={(matches) => setAiMatches(matches)}
@@ -209,36 +241,30 @@ function CampContent() {
         )}
       </section>
 
-      {/* Hackathon Filter - 미소속일 때만 변경 가능 */}
+      {/* Hackathon Filter */}
       <div className="flex items-center gap-3">
         <span className="text-sm font-medium">해커톤 필터</span>
-        {isTeamMember ? (
-          <span className="text-sm text-muted-foreground px-3 py-1.5 rounded-lg border bg-muted/50">
-            {myHackathonTitle ?? "소속 해커톤"}
-          </span>
-        ) : (
-          <Select
-            value={selectedHackathon || "__all__"}
-            onValueChange={handleHackathonChange}
-          >
-            <SelectTrigger className="w-56">
-              <SelectValue placeholder="전체">
-                {selectedHackathon
-                  ? hackathons.find((h) => h.slug === selectedHackathon)
-                      ?.title ?? "전체"
-                  : "전체"}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="__all__">전체</SelectItem>
-              {hackathons.map((h) => (
-                <SelectItem key={h.slug} value={h.slug}>
-                  {h.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
+        <Select
+          value={selectedHackathon || "__all__"}
+          onValueChange={handleHackathonChange}
+        >
+          <SelectTrigger className="w-56">
+            <SelectValue placeholder="전체">
+              {selectedHackathon
+                ? hackathons.find((h) => h.slug === selectedHackathon)
+                    ?.title ?? "전체"
+                : "전체"}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__">전체</SelectItem>
+            {hackathons.map((h) => (
+              <SelectItem key={h.slug} value={h.slug}>
+                {h.title}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* 다른 팀 목록 */}
@@ -254,11 +280,7 @@ function CampContent() {
             <TeamCard
               key={team.teamCode}
               team={team}
-              canJoin={
-                userRole === "unaffiliated" &&
-                team.isOpen &&
-                team.memberCount < team.maxTeamSize
-              }
+              canJoin={canJoinTeam(team)}
               onJoinTeam={handleJoinTeam}
             />
           ))}
@@ -277,7 +299,7 @@ function CampContent() {
               ? undefined
               : {
                   label: "팀 만들기",
-                  onClick: () => setShowCreateForm(true),
+                  onClick: () => isGuest ? requireLogin() : setShowCreateForm(true),
                 }
           }
         />
@@ -290,6 +312,11 @@ function CampContent() {
         hackathonSlug={selectedHackathon || undefined}
         hackathons={hackathons}
         onCreated={handleCreated}
+      />
+
+      <LoginRequiredDialog
+        open={loginDialogOpen}
+        onOpenChange={setLoginDialogOpen}
       />
     </div>
   );

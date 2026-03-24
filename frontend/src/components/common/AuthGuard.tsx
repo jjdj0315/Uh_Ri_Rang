@@ -13,7 +13,9 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     const profile = getUserProfile();
     const isSignup = pathname === "/signup";
 
-    if (!profile?.nickname && !isSignup) {
+    // 프로필 없거나 구버전(teams 배열 없는) 프로필이면 재로그인
+    if ((!profile?.nickname || !("teams" in profile)) && !isSignup) {
+      if (typeof window !== "undefined") localStorage.removeItem("userProfile");
       router.replace("/signup");
       return;
     }

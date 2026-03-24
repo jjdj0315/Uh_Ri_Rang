@@ -14,7 +14,15 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { getUserProfile, setUserProfile } from "@/lib/storage";
+import {
+  getUserProfile,
+  setUserProfile,
+  loginUser,
+  registerUser,
+  updateUserAccount,
+  findUser,
+} from "@/lib/storage";
+import { initializeData } from "@/lib/init-data";
 import { cn } from "@/lib/utils";
 import type { UserProfile } from "@/lib/types";
 
@@ -61,39 +69,67 @@ function SignupContent() {
   const isEdit = searchParams.get("edit") === "true";
 
   const [tab, setTab] = useState<"login" | "signup">("login");
-  const [loginNickname, setLoginNickname] = useState("");
+
+  // Login fields
+  const [loginId, setLoginId] = useState("");
+  const [loginPw, setLoginPw] = useState("");
   const [loginError, setLoginError] = useState("");
 
+  // Signup fields
+  const [signupId, setSignupId] = useState("");
+  const [signupPw, setSignupPw] = useState("");
   const [nickname, setNickname] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
   const [interests, setInterests] = useState<string[]>([]);
   const [customSkill, setCustomSkill] = useState("");
   const [error, setError] = useState("");
 
+  // 현재 로그인한 유저 ID (edit 모드용)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
   useEffect(() => {
+    initializeData();
     const profile = getUserProfile();
     if (profile && isEdit) {
       setTab("signup");
       setNickname(profile.nickname || "");
       setSkills(profile.skills || []);
       setInterests(profile.interests || []);
-    } else if (profile?.nickname && !isEdit) {
+      // 로그인한 유저 ID 복원
+      const storedId = typeof window !== "undefined"
+        ? localStorage.getItem("currentUserId")
+        : null;
+      setCurrentUserId(storedId);
+    } else if (profile?.nickname && profile.nickname !== "게스트" && !isEdit) {
       router.replace("/");
     }
   }, [isEdit, router]);
 
   // --- Login ---
   const handleLogin = () => {
-    if (!loginNickname.trim()) {
-      setLoginError("닉네임을 입력해주세요");
+    if (!loginId.trim()) {
+      setLoginError("아이디를 입력해주세요");
       return;
     }
-    const profile = getUserProfile();
-    if (profile?.nickname === loginNickname.trim()) {
-      router.push("/");
-    } else {
-      setLoginError("등록된 닉네임이 없습니다. 회원가입을 해주세요.");
+    if (!loginPw.trim()) {
+      setLoginError("비밀번호를 입력해주세요");
+      return;
     }
+    const user = loginUser(loginId.trim(), loginPw.trim());
+    if (!user) {
+      setLoginError("아이디 또는 비밀번호가 일치하지 않습니다");
+      return;
+    }
+    // 유저 프로필 로드
+    const profile: UserProfile = {
+      nickname: user.nickname,
+      skills: user.skills,
+      interests: user.interests,
+      teams: user.teams ?? [],
+    };
+    setUserProfile(profile);
+    localStorage.setItem("currentUserId", user.id);
+    router.push("/");
   };
 
   // --- Signup ---
@@ -120,6 +156,42 @@ function SignupContent() {
   };
 
   const handleSignup = () => {
+    if (isEdit) {
+      // 프로필 수정 모드
+      if (!nickname.trim()) {
+        setError("닉네임을 입력해주세요");
+        return;
+      }
+      const existing = getUserProfile();
+      const profile: UserProfile = {
+        nickname: nickname.trim(),
+        skills,
+        interests,
+        teams: existing?.teams ?? [],
+      };
+      setUserProfile(profile);
+
+      // users 목록도 동기화
+      if (currentUserId) {
+        const user = findUser(currentUserId);
+        if (user) {
+          updateUserAccount({ ...user, ...profile });
+        }
+      }
+
+      router.push("/");
+      return;
+    }
+
+    // 신규 회원가입
+    if (!signupId.trim()) {
+      setError("아이디를 입력해주세요");
+      return;
+    }
+    if (!signupPw.trim()) {
+      setError("비밀번호를 입력해주세요");
+      return;
+    }
     if (!nickname.trim()) {
       setError("닉네임을 입력해주세요");
       return;
@@ -129,23 +201,28 @@ function SignupContent() {
       return;
     }
 
-    const existing = getUserProfile();
-    const profile: UserProfile = {
-      ...(isEdit && existing ? existing : {}),
+    const success = registerUser({
+      id: signupId.trim(),
+      password: signupPw.trim(),
       nickname: nickname.trim(),
       skills,
       interests,
-      role: isEdit && existing ? existing.role : "unaffiliated",
-      ...(isEdit && existing
-        ? {
-            hackathonSlug: existing.hackathonSlug,
-            teamCode: existing.teamCode,
-            teamName: existing.teamName,
-          }
-        : {}),
-    };
+      teams: [],
+    });
 
+    if (!success) {
+      setError("이미 존재하는 아이디입니다");
+      return;
+    }
+
+    const profile: UserProfile = {
+      nickname: nickname.trim(),
+      skills,
+      interests,
+      teams: [],
+    };
     setUserProfile(profile);
+    localStorage.setItem("currentUserId", signupId.trim());
     router.push("/");
   };
 
@@ -154,9 +231,10 @@ function SignupContent() {
       nickname: "게스트",
       skills: [],
       interests: [],
-      role: "unaffiliated",
+      teams: [],
     };
     setUserProfile(guestProfile);
+    localStorage.removeItem("currentUserId");
     router.push("/");
   };
 
@@ -232,19 +310,34 @@ function SignupContent() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="login-nickname">닉네임</Label>
+                <Label htmlFor="login-id">아이디</Label>
                 <Input
-                  id="login-nickname"
-                  placeholder="가입 시 사용한 닉네임을 입력하세요"
-                  value={loginNickname}
+                  id="login-id"
+                  placeholder="아이디를 입력하세요"
+                  value={loginId}
                   onChange={(e) => {
-                    setLoginNickname(e.target.value);
+                    setLoginId(e.target.value);
                     setLoginError("");
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") handleLogin();
                   }}
-                  maxLength={20}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="login-pw">비밀번호</Label>
+                <Input
+                  id="login-pw"
+                  type="password"
+                  placeholder="비밀번호를 입력하세요"
+                  value={loginPw}
+                  onChange={(e) => {
+                    setLoginPw(e.target.value);
+                    setLoginError("");
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleLogin();
+                  }}
                 />
               </div>
               {loginError && (
@@ -281,6 +374,43 @@ function SignupContent() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* ID & Password (신규 가입만) */}
+              {!isEdit && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-id">
+                      아이디 <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="signup-id"
+                      placeholder="영문, 숫자 조합"
+                      value={signupId}
+                      onChange={(e) => {
+                        setSignupId(e.target.value);
+                        setError("");
+                      }}
+                      maxLength={20}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-pw">
+                      비밀번호 <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="signup-pw"
+                      type="password"
+                      placeholder="비밀번호"
+                      value={signupPw}
+                      onChange={(e) => {
+                        setSignupPw(e.target.value);
+                        setError("");
+                      }}
+                      maxLength={30}
+                    />
+                  </div>
+                </>
+              )}
+
               {/* Nickname */}
               <div className="space-y-2">
                 <Label htmlFor="nickname">

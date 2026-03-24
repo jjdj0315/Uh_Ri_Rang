@@ -2,6 +2,7 @@ import { hackathons } from "@/data/hackathons";
 import { hackathonDetails } from "@/data/hackathon-details";
 import { teams } from "@/data/teams";
 import { leaderboards } from "@/data/leaderboards";
+import { users } from "@/data/users";
 
 const STORAGE_KEYS = {
   HACKATHONS: "hackathons",
@@ -9,6 +10,7 @@ const STORAGE_KEYS = {
   TEAMS: "teams",
   SUBMISSIONS: "submissions",
   LEADERBOARDS: "leaderboards",
+  USERS: "users",
 } as const;
 
 /**
@@ -24,6 +26,7 @@ export function initializeData(): void {
     [STORAGE_KEYS.TEAMS]: teams,
     [STORAGE_KEYS.SUBMISSIONS]: [],
     [STORAGE_KEYS.LEADERBOARDS]: leaderboards,
+    [STORAGE_KEYS.USERS]: users,
   };
 
   for (const [key, defaultValue] of Object.entries(seed)) {
@@ -41,6 +44,16 @@ export function initializeData(): void {
         Array.isArray(parsed) &&
         parsed.length > 0 &&
         !("leaderName" in parsed[0])
+      ) {
+        localStorage.setItem(key, JSON.stringify(defaultValue));
+      }
+
+      // users 데이터가 없거나 teams 배열이 없으면 재초기화
+      if (
+        key === STORAGE_KEYS.USERS &&
+        (!Array.isArray(parsed) ||
+          parsed.length === 0 ||
+          !("teams" in parsed[0]))
       ) {
         localStorage.setItem(key, JSON.stringify(defaultValue));
       }

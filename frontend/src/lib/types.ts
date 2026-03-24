@@ -192,14 +192,43 @@ export interface LeaderboardData {
 // User Profile (Role System)
 // ============================================================
 
+export interface TeamMembership {
+  hackathonSlug: string;
+  teamCode: string;
+  teamName: string;
+  role: "leader" | "member";
+}
+
+export interface UserAccount {
+  id: string;
+  password: string;
+  nickname: string;
+  skills: string[];
+  interests: string[];
+  teams: TeamMembership[];
+}
+
 export interface UserProfile {
   nickname: string;
   skills: string[];
   interests: string[];
-  role: "leader" | "member" | "unaffiliated";
-  hackathonSlug?: string;
-  teamCode?: string;
-  teamName?: string;
+  teams: TeamMembership[];
+}
+
+// ============================================================
+// Notifications
+// ============================================================
+
+export interface Notification {
+  id: string;
+  type: "scout_request";
+  fromNickname: string;
+  teamCode: string;
+  teamName: string;
+  hackathonSlug: string;
+  message: string;
+  createdAt: string;
+  read: boolean;
 }
 
 // ============================================================

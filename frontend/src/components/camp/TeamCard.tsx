@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import type { Team } from "@/lib/types";
+import { getTeamMembers } from "@/lib/storage";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,7 +13,7 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { ExternalLinkIcon, UsersIcon, UserPlus, CrownIcon } from "lucide-react";
+import { ExternalLinkIcon, UsersIcon, UserPlus, CrownIcon, UserIcon } from "lucide-react";
 
 interface TeamCardProps {
   team: Team;
@@ -49,6 +51,11 @@ function SegmentedProgressBar({
 
 export function TeamCard({ team, canJoin, onJoinTeam }: TeamCardProps) {
   const isFull = team.memberCount >= team.maxTeamSize;
+  const [members, setMembers] = useState<{ nickname: string; role: "leader" | "member" }[]>([]);
+
+  useEffect(() => {
+    setMembers(getTeamMembers(team.teamCode));
+  }, [team.teamCode]);
 
   return (
     <Card>
@@ -79,10 +86,19 @@ export function TeamCard({ team, canJoin, onJoinTeam }: TeamCardProps) {
       </CardHeader>
 
       <CardContent className="space-y-3">
-        {team.leaderName && (
-          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <CrownIcon className="size-3.5 text-amber-500" />
-            <span>{team.leaderName}</span>
+        {/* 멤버 목록 */}
+        {members.length > 0 && (
+          <div className="space-y-1.5">
+            {members.map((m) => (
+              <div key={m.nickname} className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                {m.role === "leader" ? (
+                  <CrownIcon className="size-3.5 text-amber-500 shrink-0" />
+                ) : (
+                  <UserIcon className="size-3.5 shrink-0" />
+                )}
+                <span>{m.nickname}</span>
+              </div>
+            ))}
           </div>
         )}
         {team.lookingFor.length > 0 && (

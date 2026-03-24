@@ -17,22 +17,33 @@ import {
   LogIn,
   UserMinus,
   UserPlus,
+  Bell,
+  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getUserProfile, setUserProfile, clearUserProfile, leaveTeam } from "@/lib/storage";
-import type { UserProfile } from "@/lib/types";
+import {
+  getUserProfile,
+  setUserProfile,
+  clearUserProfile,
+  leaveTeam,
+  syncProfileToAccount,
+  getNotifications,
+  getUnreadCount,
+  removeNotification,
+  joinTeam,
+} from "@/lib/storage";
+import type { UserProfile, Notification } from "@/lib/types";
 
 const navLinks = [
   { href: "/hackathons", label: "Hackathons" },
   { href: "/camp", label: "Camp" },
+  { href: "/myteam", label: "My Team" },
   { href: "/rankings", label: "Rankings" },
 ];
 
-const ROLE_META: Record<
-  UserProfile["role"],
-  { label: string; icon: typeof Crown }
-> = {
+type RoleType = "leader" | "member" | "unaffiliated";
+const ROLE_META: Record<RoleType, { label: string; icon: typeof Crown }> = {
   leader: { label: "팀장", icon: Crown },
   member: { label: "팀원", icon: Users },
   unaffiliated: { label: "무소속", icon: User },
@@ -46,7 +57,11 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const popoverRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -64,6 +79,10 @@ export function Navbar() {
         if (JSON.stringify(prev) !== JSON.stringify(current)) return current;
         return prev;
       });
+      // 알림 카운트 업데이트
+      if (current?.nickname) {
+        setUnreadCount(getUnreadCount(current.nickname));
+      }
     }, 1000);
 
     return () => {
@@ -72,42 +91,84 @@ export function Navbar() {
     };
   }, []);
 
-  // Close popover on outside click
+  // Close popover/notif on outside click
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
         setPopoverOpen(false);
       }
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setNotifOpen(false);
+      }
     };
-    if (popoverOpen) document.addEventListener("mousedown", handleClick);
+    if (popoverOpen || notifOpen) document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
-  }, [popoverOpen]);
+  }, [popoverOpen, notifOpen]);
 
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
 
-  const handleLeaveTeam = () => {
-    if (!profile?.teamCode) return;
-    leaveTeam(profile.teamCode);
+  const handleLeaveTeam = (teamCode: string) => {
+    if (!profile) return;
+    leaveTeam(teamCode);
     const updated: UserProfile = {
-      nickname: profile.nickname,
-      skills: profile.skills,
-      interests: profile.interests,
-      role: "unaffiliated",
+      ...profile,
+      teams: profile.teams.filter((t) => t.teamCode !== teamCode),
     };
     setUserProfile(updated);
+    syncProfileToAccount(updated);
     setProfile(updated);
     setPopoverOpen(false);
   };
 
+  const openNotifications = () => {
+    if (!profile?.nickname) return;
+    setNotifications(getNotifications(profile.nickname));
+    setNotifOpen(!notifOpen);
+    setPopoverOpen(false);
+  };
+
+  const handleAcceptScout = (notif: Notification) => {
+    if (!profile) return;
+    // 팀 참여
+    joinTeam(notif.teamCode);
+    const updated: UserProfile = {
+      ...profile,
+      teams: [
+        ...profile.teams,
+        {
+          hackathonSlug: notif.hackathonSlug,
+          teamCode: notif.teamCode,
+          teamName: notif.teamName,
+          role: "member",
+        },
+      ],
+    };
+    setUserProfile(updated);
+    syncProfileToAccount(updated);
+    setProfile(updated);
+    removeNotification(profile.nickname, notif.id);
+    setNotifications(getNotifications(profile.nickname));
+    setUnreadCount(getUnreadCount(profile.nickname));
+  };
+
+  const handleRejectScout = (notifId: string) => {
+    if (!profile?.nickname) return;
+    removeNotification(profile.nickname, notifId);
+    setNotifications(getNotifications(profile.nickname));
+    setUnreadCount(getUnreadCount(profile.nickname));
+  };
+
   const handleLogout = () => {
     clearUserProfile();
+    localStorage.removeItem("currentUserId");
     setPopoverOpen(false);
     router.push("/signup");
   };
 
-  const roleMeta = profile ? ROLE_META[profile.role] : null;
+  const hasTeams = (profile?.teams?.length ?? 0) > 0;
+  const primaryRole: RoleType = hasTeams ? profile!.teams[0].role : "unaffiliated";
+  const roleMeta = profile ? ROLE_META[primaryRole] : null;
   const RoleIcon = roleMeta?.icon;
-  const isInTeam = profile?.role === "leader" || profile?.role === "member";
   const isGuest = profile?.nickname === "게스트";
 
   return (
@@ -155,17 +216,24 @@ export function Navbar() {
                   {/* Header */}
                   <div className="mb-3">
                     <p className="font-semibold">{profile.nickname}</p>
-                    <div className="mt-1 flex items-center gap-2">
-                      <Badge variant="outline" className="gap-1 text-xs">
-                        {RoleIcon && <RoleIcon className="size-3" />}
-                        {roleMeta?.label}
+                    {profile.teams.length > 0 ? (
+                      <div className="mt-2 space-y-1">
+                        {profile.teams.map((t) => (
+                          <div key={t.teamCode} className="flex items-center gap-2">
+                            <Badge variant="outline" className="gap-1 text-xs">
+                              {t.role === "leader" ? <Crown className="size-3" /> : <Users className="size-3" />}
+                              {t.role === "leader" ? "팀장" : "팀원"}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">{t.teamName}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <Badge variant="outline" className="mt-1 gap-1 text-xs">
+                        <User className="size-3" />
+                        무소속
                       </Badge>
-                      {profile.teamName && (
-                        <span className="text-xs text-muted-foreground">
-                          {profile.teamName}
-                        </span>
-                      )}
-                    </div>
+                    )}
                   </div>
 
                   {/* Skills */}
@@ -224,16 +292,17 @@ export function Navbar() {
                           <Pencil className="size-3.5" />
                           프로필 수정
                         </button>
-                        {isInTeam && (
+                        {profile.teams.map((t) => (
                           <button
+                            key={t.teamCode}
                             type="button"
                             className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-muted transition-colors text-destructive"
-                            onClick={handleLeaveTeam}
+                            onClick={() => handleLeaveTeam(t.teamCode)}
                           >
                             <UserMinus className="size-3.5" />
-                            팀 탈퇴
+                            {t.teamName} 탈퇴
                           </button>
-                        )}
+                        ))}
                         <button
                           type="button"
                           className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-muted transition-colors text-muted-foreground"
@@ -245,6 +314,70 @@ export function Navbar() {
                       </>
                     )}
                   </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Notification bell */}
+          {mounted && profile && !isGuest && (
+            <div className="relative" ref={notifRef}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={openNotifications}
+                aria-label="Notifications"
+              >
+                <Bell className="size-4" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] text-white font-bold">
+                    {unreadCount}
+                  </span>
+                )}
+              </Button>
+
+              {notifOpen && (
+                <div className="absolute right-0 top-full mt-2 w-80 max-h-96 overflow-y-auto rounded-lg border border-border bg-card shadow-lg z-50">
+                  <div className="p-3 border-b border-border">
+                    <span className="text-sm font-semibold">알림</span>
+                  </div>
+                  {notifications.length === 0 ? (
+                    <div className="p-4 text-center text-sm text-muted-foreground">
+                      알림이 없습니다
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-border">
+                      {notifications.map((n) => (
+                        <div key={n.id} className="p-3 space-y-2">
+                          <p className="text-sm">{n.message}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(n.createdAt).toLocaleDateString("ko-KR")}
+                          </p>
+                          {n.type === "scout_request" && (
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                className="flex-1"
+                                onClick={() => handleAcceptScout(n)}
+                              >
+                                <Check className="size-3.5 mr-1" />
+                                수락
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="flex-1"
+                                onClick={() => handleRejectScout(n.id)}
+                              >
+                                <X className="size-3.5 mr-1" />
+                                거절
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

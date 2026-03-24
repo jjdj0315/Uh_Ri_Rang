@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Hackathon, Team } from "@/lib/types";
-import { addTeam, getUserProfile, setUserProfile } from "@/lib/storage";
+import { addTeam, getUserProfile, setUserProfile, syncProfileToAccount } from "@/lib/storage";
 import {
   Dialog,
   DialogContent,
@@ -101,17 +101,23 @@ export function TeamCreateForm({
 
     addTeam(team);
 
-    // 팀 생성 후 자동으로 팀장 역할 전환 (기존 프로필 보존)
-    setUserProfile({
-      ...currentProfile,
+    // 팀 생성 후 자동으로 팀장 역할 추가 (기존 프로필 보존)
+    const updatedProfile = {
       nickname: currentProfile?.nickname ?? "",
       skills: currentProfile?.skills ?? [],
       interests: currentProfile?.interests ?? [],
-      role: "leader",
-      hackathonSlug: selectedHackathon,
-      teamCode: team.teamCode,
-      teamName: team.name,
-    });
+      teams: [
+        ...(currentProfile?.teams ?? []),
+        {
+          hackathonSlug: selectedHackathon,
+          teamCode: team.teamCode,
+          teamName: team.name,
+          role: "leader" as const,
+        },
+      ],
+    };
+    setUserProfile(updatedProfile);
+    syncProfileToAccount(updatedProfile);
 
     resetForm();
     onOpenChange(false);
