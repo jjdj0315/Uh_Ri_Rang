@@ -134,25 +134,25 @@ function CampContent() {
     : undefined;
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8 px-4 py-8">
+    <div className="flex flex-col gap-6">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">
+      <div>
+        <div className="flex items-start justify-between">
+          <h1 className="text-3xl font-bold tracking-tight">
             {isTeamMember ? "팀원 찾기" : "팀 찾기"}
           </h1>
-          <p className="text-sm text-muted-foreground">
-            {isTeamMember
-              ? "우리 팀에 합류할 팀원을 찾아보세요."
-              : "함께할 팀을 찾거나, 새로운 팀을 만들어보세요."}
-          </p>
+          {!alreadyInTeamForHackathon && (
+            <Button onClick={() => isGuest ? requireLogin() : setShowCreateForm(true)}>
+              <PlusIcon className="size-4 mr-1" />
+              팀 만들기
+            </Button>
+          )}
         </div>
-        {!alreadyInTeamForHackathon && (
-          <Button onClick={() => isGuest ? requireLogin() : setShowCreateForm(true)}>
-            <PlusIcon className="size-4 mr-1" />
-            팀 만들기
-          </Button>
-        )}
+        <p className="mt-1 text-sm text-muted-foreground">
+          {isTeamMember
+            ? "우리 팀에 합류할 팀원을 찾아보세요."
+            : "함께할 팀을 찾거나, 새로운 팀을 만들어보세요."}
+        </p>
       </div>
 
       {/* 내 팀 카드 (현재 해커톤에서 소속된 팀이 있을 때) */}
@@ -275,14 +275,15 @@ function CampContent() {
       )}
 
       {otherTeams.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {otherTeams.map((team) => (
-            <TeamCard
-              key={team.teamCode}
-              team={team}
-              canJoin={canJoinTeam(team)}
-              onJoinTeam={handleJoinTeam}
-            />
+            <div key={team.teamCode} className="animate-card">
+              <TeamCard
+                team={team}
+                canJoin={canJoinTeam(team)}
+                onJoinTeam={handleJoinTeam}
+              />
+            </div>
           ))}
         </div>
       ) : (

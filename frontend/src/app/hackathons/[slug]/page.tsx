@@ -50,10 +50,10 @@ export default function HackathonDetailPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
-      <div className="space-y-2">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold">{detail.title}</h1>
+    <div className="flex flex-col gap-6">
+      <div>
+        <div className="flex items-start gap-3">
+          <h1 className="text-3xl font-bold tracking-tight">{detail.title}</h1>
           {hackathon && <StatusBadge status={hackathon.status} />}
         </div>
       </div>

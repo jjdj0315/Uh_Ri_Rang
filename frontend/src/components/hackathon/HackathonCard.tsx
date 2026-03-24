@@ -18,10 +18,10 @@ interface HackathonCardProps {
 export function HackathonCard({ hackathon }: HackathonCardProps) {
   return (
     <Link href={`/hackathons/${hackathon.slug}`}>
-      <Card className="h-full cursor-pointer transition-shadow hover:shadow-lg">
+      <Card className="h-full cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
         <CardHeader>
           <div className="flex items-start justify-between gap-2">
-            <CardTitle className="line-clamp-2 text-base font-semibold leading-snug">
+            <CardTitle className="line-clamp-2 text-lg font-semibold leading-snug">
               {hackathon.title}
             </CardTitle>
             <StatusBadge status={hackathon.status} />

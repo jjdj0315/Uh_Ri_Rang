@@ -75,8 +75,8 @@ export default function RankingsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold">리더보드</h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <h1 className="text-3xl font-bold tracking-tight">리더보드</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           해커톤별 순위를 확인하세요
         </p>
       </div>

@@ -11,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
   CardContent,
-  CardFooter,
 } from "@/components/ui/card";
 import { ExternalLinkIcon, UsersIcon, UserPlus, CrownIcon, UserIcon } from "lucide-react";
 
@@ -58,10 +57,10 @@ export function TeamCard({ team, canJoin, onJoinTeam }: TeamCardProps) {
   }, [team.teamCode]);
 
   return (
-    <Card>
+    <Card className="transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
       <CardHeader>
         <div className="flex items-center justify-between gap-2">
-          <CardTitle>{team.name}</CardTitle>
+          <CardTitle className="text-lg font-semibold">{team.name}</CardTitle>
           <StatusBadge status={team.isOpen ? "open" : "closed"} />
         </div>
         <div className="space-y-1">
@@ -115,31 +114,30 @@ export function TeamCard({ team, canJoin, onJoinTeam }: TeamCardProps) {
             {team.intro}
           </p>
         )}
-      </CardContent>
-
-      <CardFooter className="gap-2">
-        <Button
-          size="sm"
-          variant="outline"
-          className="flex-1"
-          onClick={() =>
-            window.open(team.contact.url, "_blank", "noopener,noreferrer")
-          }
-        >
-          <ExternalLinkIcon className="size-4 mr-1" />
-          연락하기
-        </Button>
-        {canJoin && (
+        <div className="flex gap-2 pt-2">
           <Button
             size="sm"
+            variant="outline"
             className="flex-1"
-            onClick={() => onJoinTeam?.(team)}
+            onClick={() =>
+              window.open(team.contact.url, "_blank", "noopener,noreferrer")
+            }
           >
-            <UserPlus className="size-4 mr-1" />
-            참여하기
+            <ExternalLinkIcon className="size-4 mr-1" />
+            연락하기
           </Button>
-        )}
-      </CardFooter>
+          {canJoin && (
+            <Button
+              size="sm"
+              className="flex-1"
+              onClick={() => onJoinTeam?.(team)}
+            >
+              <UserPlus className="size-4 mr-1" />
+              참여하기
+            </Button>
+          )}
+        </div>
+      </CardContent>
     </Card>
   );
 }

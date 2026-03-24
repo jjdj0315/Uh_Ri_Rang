@@ -44,7 +44,12 @@ export default function HackathonsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-bold">해커톤 목록</h1>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">해커톤 목록</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          다양한 해커톤에 참가하고 실력을 겨뤄보세요
+        </p>
+      </div>
 
       <HackathonFilter
         filters={filters}
@@ -53,9 +58,11 @@ export default function HackathonsPage() {
       />
 
       {filtered.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((h) => (
-            <HackathonCard key={h.slug} hackathon={h} />
+            <div key={h.slug} className="animate-card">
+              <HackathonCard hackathon={h} />
+            </div>
           ))}
         </div>
       ) : (

@@ -50,43 +50,41 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-16">
+    <div className="flex flex-col gap-6">
       {/* Hero Section */}
-      <section className="-mx-4 -mt-8 border-b border-border bg-muted/30 px-6 py-24">
-        <div className="mx-auto max-w-3xl">
-          <p className="mb-4 text-sm font-semibold tracking-widest text-primary/60 uppercase">
-            HACKATHON PLATFORM
-          </p>
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-            아이디어를 현실로.
-            <br />
-            함께 만드는 혁신
-          </h1>
-          <p className="mt-5 text-base text-muted-foreground sm:text-lg">
-            전국의 개발자, 디자이너, 기획자들과 함께 혁신적인 프로젝트를
-            만들어보세요. 최고의 팀과 함께 성장할 기회를 제공합니다.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/hackathons">
-              <Button size="lg">
-                해커톤 둘러보기
-                <ArrowRight className="ml-2 size-4" />
-              </Button>
-            </Link>
-            <Link href="/rankings">
-              <Button size="lg" variant="outline">
-                랭킹 보기
-              </Button>
-            </Link>
-          </div>
+      <section className="rounded-xl bg-muted/30 px-6 py-16 sm:py-20">
+        <p className="mb-4 text-sm font-semibold tracking-widest text-primary/60 uppercase">
+          HACKATHON PLATFORM
+        </p>
+        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+          아이디어를 현실로.
+          <br />
+          함께 만드는 혁신
+        </h1>
+        <p className="mt-5 max-w-xl text-base text-muted-foreground sm:text-lg">
+          전국의 개발자, 디자이너, 기획자들과 함께 혁신적인 프로젝트를
+          만들어보세요. 최고의 팀과 함께 성장할 기회를 제공합니다.
+        </p>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link href="/hackathons">
+            <Button size="lg">
+              해커톤 둘러보기
+              <ArrowRight className="ml-2 size-4" />
+            </Button>
+          </Link>
+          <Link href="/rankings">
+            <Button size="lg" variant="outline">
+              랭킹 보기
+            </Button>
+          </Link>
         </div>
       </section>
 
       {/* 진행 중인 해커톤 */}
       <section>
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold sm:text-3xl">진행 중인 해커톤</h2>
-          <p className="mt-2 text-muted-foreground">
+        <div className="mb-6">
+          <h2 className="text-3xl font-bold tracking-tight">진행 중인 해커톤</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
             지금 바로 참여할 수 있는 해커톤을 확인하세요
           </p>
         </div>
@@ -94,8 +92,8 @@ export default function Home() {
         {hackathons.length > 0 ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {hackathons.map((h) => (
-              <Link key={h.slug} href={`/hackathons/${h.slug}`}>
-                <Card className="h-full cursor-pointer transition-shadow hover:shadow-lg">
+              <Link key={h.slug} href={`/hackathons/${h.slug}`} className="animate-card">
+                <Card className="h-full cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
                   <CardHeader className="pb-3">
                     <StatusBadge status={h.status} />
                     <CardTitle className="mt-3 text-lg leading-snug">
@@ -140,7 +138,7 @@ export default function Home() {
           </p>
         )}
 
-        <div className="mt-10 flex justify-center">
+        <div className="mt-8 flex justify-center">
           <Link href="/hackathons">
             <Button variant="outline" size="lg">
               모든 해커톤 보기
