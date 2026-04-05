@@ -57,7 +57,7 @@ export function TeamCard({ team, canJoin, onJoinTeam }: TeamCardProps) {
   }, [team.teamCode]);
 
   return (
-    <Card className="transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
+    <Card className="transition-all duration-200 hover:shadow-lg hover:-translate-y-1 flex flex-col h-[320px]">
       <CardHeader>
         <div className="flex items-center justify-between gap-2">
           <CardTitle className="text-lg font-semibold">{team.name}</CardTitle>
@@ -84,7 +84,7 @@ export function TeamCard({ team, canJoin, onJoinTeam }: TeamCardProps) {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-3 flex-1 overflow-y-auto">
         {/* 멤버 목록 */}
         {members.length > 0 && (
           <div className="space-y-1.5">

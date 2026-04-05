@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/common/StatusBadge";
+import { DdayCountdown } from "@/components/hackathon/DdayCountdown";
 import { HackathonTabs } from "@/components/hackathon/HackathonTabs";
 import { initializeData } from "@/lib/init-data";
 import { getHackathonDetail, getHackathons } from "@/lib/storage";
@@ -56,6 +57,12 @@ export default function HackathonDetailPage() {
           <h1 className="text-3xl font-bold tracking-tight">{detail.title}</h1>
           {hackathon && <StatusBadge status={hackathon.status} />}
         </div>
+        {hackathon && (
+          <DdayCountdown
+            deadlineAt={hackathon.period.submissionDeadlineAt}
+            status={hackathon.status}
+          />
+        )}
       </div>
 
       <HackathonTabs sections={detail.sections} hackathonSlug={slug} />

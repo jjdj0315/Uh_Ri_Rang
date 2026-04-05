@@ -31,57 +31,64 @@ export function ScoreDistributionBar({
   return (
     <div className="space-y-1">
       {/* Score range labels */}
-      <div className="flex justify-between text-xs text-muted-foreground">
+      <div className="flex justify-between text-xs text-muted-foreground mb-1">
         <span>{minScore.toLocaleString()}점</span>
         <span>{maxScore.toLocaleString()}점</span>
       </div>
 
-      {/* Bar with marker */}
+      {/* The bar */}
       <div className="relative">
-        {/* Marker above the bar */}
-        {myEntry && markerPercent != null ? (
-          <div
-            className="absolute -top-6 flex flex-col items-center"
-            style={{
-              left: `${markerPercent}%`,
-              transform: "translateX(-50%)",
-            }}
-          >
-            <span className="text-[10px] font-semibold text-primary whitespace-nowrap">
-              {myEntry.teamName}
-            </span>
-            <svg
-              width="10"
-              height="6"
-              viewBox="0 0 10 6"
-              className="text-primary fill-current"
-            >
-              <polygon points="5,6 0,0 10,0" />
-            </svg>
-          </div>
-        ) : null}
-
-        {/* The bar */}
         <div className="h-2 w-full rounded-full bg-gradient-to-r from-slate-200 to-primary dark:from-slate-700 dark:to-primary" />
 
         {/* Dot marker on the bar */}
         {myEntry && markerPercent != null && (
           <div
-            className="absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full border-2 border-white bg-primary shadow dark:border-slate-900"
+            className="absolute top-1/2 h-3.5 w-3.5 rounded-full border-2 border-white bg-primary shadow dark:border-slate-900"
             style={{
               left: `${markerPercent}%`,
-              transform: `translateX(-50%) translateY(-50%)`,
+              transform: "translateX(-50%) translateY(-50%)",
             }}
           />
         )}
       </div>
 
-      {/* Fallback when no team */}
-      {!myEntry && (
+      {/* My team label below the bar */}
+      {myEntry && markerPercent != null ? (
+        <div
+          className="relative"
+        >
+          <div
+            className={`absolute top-0 flex items-center gap-1 ${
+              markerPercent > 75
+                ? "right-0"
+                : markerPercent < 25
+                  ? "left-0"
+                  : ""
+            }`}
+            style={
+              markerPercent >= 25 && markerPercent <= 75
+                ? { left: `${markerPercent}%`, transform: "translateX(-50%)" }
+                : undefined
+            }
+          >
+            <svg
+              width="8"
+              height="8"
+              viewBox="0 0 8 8"
+              className="text-primary fill-current shrink-0"
+            >
+              <circle cx="4" cy="4" r="4" />
+            </svg>
+            <span className="text-xs font-semibold text-primary whitespace-nowrap">
+              {myEntry.teamName} · {myEntry.score}점
+            </span>
+          </div>
+        </div>
+      ) : !myEntry ? (
         <p className="text-xs text-muted-foreground">
           아직 참가하지 않았습니다
         </p>
-      )}
+      ) : null}
     </div>
   );
 }

@@ -33,6 +33,7 @@ import {
   removeNotification,
   joinTeam,
 } from "@/lib/storage";
+import { toast } from "sonner";
 import type { UserProfile, Notification } from "@/lib/types";
 
 const navLinks = [
@@ -149,6 +150,7 @@ export function Navbar() {
     removeNotification(profile.nickname, notif.id);
     setNotifications(getNotifications(profile.nickname));
     setUnreadCount(getUnreadCount(profile.nickname));
+    toast.success(`${notif.teamName} 팀에 합류했습니다!`);
   };
 
   const handleRejectScout = (notifId: string) => {
@@ -156,6 +158,7 @@ export function Navbar() {
     removeNotification(profile.nickname, notifId);
     setNotifications(getNotifications(profile.nickname));
     setUnreadCount(getUnreadCount(profile.nickname));
+    toast("스카웃 요청을 거절했습니다");
   };
 
   const handleLogout = () => {

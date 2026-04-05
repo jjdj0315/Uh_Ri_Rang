@@ -18,6 +18,7 @@ import { TeamCard } from "@/components/camp/TeamCard";
 import { TeamCreateForm } from "@/components/camp/TeamCreateForm";
 import { AISearchBar, type AIMatch } from "@/components/camp/AISearchBar";
 import { AIMatchResult } from "@/components/camp/AIMatchResult";
+import { AISearchSkeleton } from "@/components/camp/AISearchSkeleton";
 import { EmptyState } from "@/components/common/EmptyState";
 import { LoginRequiredDialog } from "@/components/common/LoginRequiredDialog";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ import {
 } from "@/components/ui/select";
 import { PlusIcon, UsersIcon, CrownIcon, UserIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 function CampContent() {
   const router = useRouter();
@@ -43,6 +45,7 @@ function CampContent() {
   const [allTeams, setAllTeams] = useState<Team[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [aiMatches, setAiMatches] = useState<AIMatch[] | null>(null);
+  const [aiStatus, setAiStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   // 현재 선택된 해커톤 기준으로 역할 판단
@@ -107,6 +110,7 @@ function CampContent() {
     syncProfileToAccount(updated);
     setUserProfile(updated);
     loadTeams(selectedHackathon || undefined);
+    toast.success(`${team.name} 팀에 참여했습니다!`);
   }
 
   // 현재 해커톤에서의 내 팀
@@ -235,8 +239,10 @@ function CampContent() {
           skills={userProfile?.skills}
           interests={userProfile?.interests}
           onResults={(matches) => setAiMatches(matches)}
+          onStatusChange={setAiStatus}
         />
-        {aiMatches !== null && (
+        {aiStatus === "loading" && <AISearchSkeleton />}
+        {aiMatches !== null && aiStatus !== "loading" && (
           <AIMatchResult matches={aiMatches} teams={allTeams} />
         )}
       </section>
