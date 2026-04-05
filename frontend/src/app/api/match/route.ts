@@ -74,7 +74,7 @@ ${JSON.stringify(candidates, null, 2)}
     const result = await model.generateContent(prompt);
     const text = result.response.text();
     const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("Invalid response");
+    if (!jsonMatch) throw new Error("Invalid response format");
     const parsed = JSON.parse(jsonMatch[0]);
     if (parsed.matches) {
       parsed.matches = parsed.matches.filter(
@@ -82,7 +82,8 @@ ${JSON.stringify(candidates, null, 2)}
       );
     }
     return Response.json(parsed);
-  } catch {
+  } catch (err) {
+    console.error("[recruit] AI match error:", err);
     return Response.json(
       { error: "AI 검색에 실패했습니다." },
       { status: 500 }
@@ -186,7 +187,7 @@ ${JSON.stringify(filteredTeams, null, 2)}
     const result = await model.generateContent(prompt);
     const text = result.response.text();
     const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("Invalid response");
+    if (!jsonMatch) throw new Error("Invalid response format");
     const parsed = JSON.parse(jsonMatch[0]);
     if (parsed.matches) {
       parsed.matches = parsed.matches.filter(
@@ -194,7 +195,8 @@ ${JSON.stringify(filteredTeams, null, 2)}
       );
     }
     return Response.json(parsed);
-  } catch {
+  } catch (err) {
+    console.error("[teamMatch] AI match error:", err);
     return Response.json(
       { error: "AI 검색에 실패했습니다." },
       { status: 500 }
