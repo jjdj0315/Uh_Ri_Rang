@@ -3,3 +3,8 @@ frontend/test-pages.py
 
 # Presentation files
 *.pdf
+
+# Claude Code
+CLAUDE.md
+TODO-list.md
+.claude/
