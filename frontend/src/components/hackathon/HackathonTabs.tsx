@@ -30,7 +30,7 @@ const TAB_ITEMS = [
 export function HackathonTabs({ sections, hackathonSlug }: HackathonTabsProps) {
   return (
     <Tabs defaultValue={0}>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto sticky top-0 z-10 bg-background/95 backdrop-blur-sm pb-1">
         <TabsList className="w-full justify-start">
           {TAB_ITEMS.map((tab) => (
             <TabsTrigger key={tab.value} value={tab.value}>

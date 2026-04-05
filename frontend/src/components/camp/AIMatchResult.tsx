@@ -38,7 +38,7 @@ export function AIMatchResult({ matches, teams }: AIMatchResultProps) {
           const scorePercent = Math.round(match.score * 100);
 
           return (
-            <Card key={match.teamCode} size="sm">
+            <Card key={match.teamCode} size="sm" className="animate-card flex flex-col h-[220px]">
               <CardHeader>
                 <div className="flex items-center justify-between gap-2">
                   <CardTitle>{match.teamName}</CardTitle>
@@ -47,7 +47,7 @@ export function AIMatchResult({ matches, teams }: AIMatchResultProps) {
                   </span>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-1 overflow-y-auto">
                 <p className="text-sm text-muted-foreground">{match.reason}</p>
               </CardContent>
               {team && (

@@ -7,6 +7,7 @@ import { getLeaderboards, getHackathons, getUserProfile } from "@/lib/storage";
 import { RankingTable } from "@/components/rankings/RankingTable";
 import { Podium } from "@/components/rankings/Podium";
 import { MyRankCard } from "@/components/rankings/MyRankCard";
+import { ScoreDistributionBar } from "@/components/rankings/ScoreDistributionBar";
 import { EmptyState } from "@/components/common/EmptyState";
 import {
   Select,
@@ -107,6 +108,11 @@ export default function RankingsPage() {
         score={myEntry?.score}
         totalTeams={entries.length}
       />
+
+      {/* Score distribution */}
+      {entries.length > 1 && (
+        <ScoreDistributionBar entries={entries} myTeamName={myTeamName} />
+      )}
 
       {entries.length > 0 ? (
         <>

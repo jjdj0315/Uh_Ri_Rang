@@ -20,6 +20,7 @@ interface AISearchBarProps {
   skills?: string[];
   interests?: string[];
   onResults: (matches: AIMatch[]) => void;
+  onStatusChange?: (status: "idle" | "loading" | "success" | "error") => void;
 }
 
 export function AISearchBar({
@@ -29,6 +30,7 @@ export function AISearchBar({
   skills,
   interests,
   onResults,
+  onStatusChange,
 }: AISearchBarProps) {
   const isTeamMember = role === "leader" || role === "member";
   const [query, setQuery] = useState("");
@@ -45,6 +47,7 @@ export function AISearchBar({
     }
 
     setStatus("loading");
+    onStatusChange?.("loading");
     setErrorMsg("");
 
     try {
@@ -69,9 +72,11 @@ export function AISearchBar({
       const matches: AIMatch[] = data.matches ?? [];
       onResults(matches);
       setStatus("success");
+      onStatusChange?.("success");
     } catch {
       setErrorMsg("AI 검색에 실패했습니다. 잠시 후 다시 시도해주세요.");
       setStatus("error");
+      onStatusChange?.("error");
       onResults([]);
     }
   }

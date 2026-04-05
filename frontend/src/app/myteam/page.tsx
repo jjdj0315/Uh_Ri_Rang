@@ -43,6 +43,7 @@ import {
   Loader2Icon,
   SparklesIcon,
 } from "lucide-react";
+import { toast } from "sonner";
 
 interface TeamWithMeta {
   membership: TeamMembership;
@@ -229,6 +230,7 @@ export default function MyTeamPage() {
     });
 
     setSentScouts((prev) => new Set(prev).add(`${targetNickname}-${teamCode}`));
+    toast.success(`${targetNickname}님에게 스카웃 요청을 보냈습니다!`);
   }
 
   if (!profile) {
@@ -264,13 +266,13 @@ export default function MyTeamPage() {
         />
       ) : (
         <div className="space-y-6">
-          {myTeams.map(({ membership, team, hackathonTitle, members }) => {
+          {myTeams.map(({ membership, team, hackathonTitle, members }, idx) => {
             const isLeader = membership.role === "leader";
             const isEditing = editingTeamCode === team.teamCode;
 
             return (
               <Card
-                key={team.teamCode}
+                key={`${team.teamCode}-${membership.hackathonSlug}-${idx}`}
                 className={
                   isLeader ? "ring-2 ring-amber-500/30 bg-amber-500/5" : ""
                 }

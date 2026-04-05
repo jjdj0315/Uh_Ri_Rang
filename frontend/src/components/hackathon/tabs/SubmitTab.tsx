@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle2Icon } from "lucide-react";
+import { toast } from "sonner";
 import { addSubmission, getUserProfile, updateLeaderboardOnSubmit } from "@/lib/storage";
 import type { SubmitSection } from "@/lib/types";
 
@@ -109,13 +111,14 @@ export function SubmitTab({ data, hackathonSlug }: SubmitTabProps) {
     // 리더보드 갱신
     updateLeaderboardOnSubmit(hackathonSlug, teamName, artifacts);
 
+    toast.success("제출 완료! 리더보드에 반영됩니다.");
     setSubmitted(true);
   };
 
   if (submitted) {
     return (
       <div className="flex flex-col items-center gap-4 py-16 text-center">
-        <div className="text-4xl">&#10003;</div>
+        <CheckCircle2Icon className="size-16 text-green-500 animate-scale-in" />
         <h3 className="text-lg font-semibold">제출 완료!</h3>
         <p className="text-sm text-muted-foreground">
           제출이 성공적으로 완료되었습니다. 리더보드에 반영됩니다.

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { AppShell } from "@/components/layout/AppShell";
 import "./globals.css";
@@ -30,6 +31,7 @@ export default function RootLayout({
       <body className={`${spaceGrotesk.variable} ${jetbrains.variable} antialiased`}>
         <ThemeProvider>
           <AppShell>{children}</AppShell>
+          <Toaster position="bottom-right" richColors closeButton />
         </ThemeProvider>
       </body>
     </html>
