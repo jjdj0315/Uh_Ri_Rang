@@ -273,9 +273,9 @@ export default function MyTeamPage() {
             return (
               <Card
                 key={`${team.teamCode}-${membership.hackathonSlug}-${idx}`}
-                className={
+                className={`animate-card ${
                   isLeader ? "ring-2 ring-amber-500/30 bg-amber-500/5" : ""
-                }
+                }`}
               >
                 <CardHeader>
                   <div className="flex items-center gap-2">

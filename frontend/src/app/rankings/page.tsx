@@ -102,12 +102,14 @@ export default function RankingsPage() {
       </div>
 
       {/* My rank summary */}
+      <div className="animate-card">
       <MyRankCard
         teamName={myEntry?.teamName ?? myTeamName}
         rank={myEntry?.rank}
         score={myEntry?.score}
         totalTeams={entries.length}
       />
+      </div>
 
       {/* Score distribution */}
       {entries.length > 1 && (
@@ -117,10 +119,14 @@ export default function RankingsPage() {
       {entries.length > 0 ? (
         <>
           {/* Top 3 Podium */}
-          <Podium entries={entries.filter((e) => e.rank <= 3)} />
+          <div className="animate-card">
+            <Podium entries={entries.filter((e) => e.rank <= 3)} />
+          </div>
 
           {/* Full ranking table */}
-          <RankingTable entries={entries} myTeamName={myTeamName} />
+          <div className="animate-card">
+            <RankingTable entries={entries} myTeamName={myTeamName} />
+          </div>
         </>
       ) : (
         <EmptyState
