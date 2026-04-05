@@ -195,10 +195,9 @@ export function updateLeaderboardOnSubmit(
     lb.entries[existingIdx].submittedAt = new Date().toISOString();
     if (artifacts) lb.entries[existingIdx].artifacts = artifacts;
     // 점수는 랜덤 소폭 변동 (데모용)
-    lb.entries[existingIdx].score = Math.min(
-      100,
-      lb.entries[existingIdx].score + Math.random() * 3
-    );
+    lb.entries[existingIdx].score = Math.round(
+      Math.min(100, lb.entries[existingIdx].score + Math.random() * 3) * 100
+    ) / 100;
   } else {
     // 새 엔트리 추가 — 기본 점수는 기존 최하위 근처에서 랜덤
     const lowestScore = lb.entries.length > 0

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { AppShell } from "@/components/layout/AppShell";
 import "./globals.css";
 
-const spaceGrotesk = Space_Grotesk({
+const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
@@ -28,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" suppressHydrationWarning>
-      <body className={`${spaceGrotesk.variable} ${jetbrains.variable} antialiased`}>
+      <body className={`${inter.variable} ${jetbrains.variable} antialiased`}>
         <ThemeProvider>
           <AppShell>{children}</AppShell>
           <Toaster position="bottom-right" richColors closeButton />
